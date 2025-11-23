@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "dev:frontend": "cd frontend && tsc --watch",
+    "dev:backend": "cd backend && tsc --watch",
+    "test": "ts-node backend/test/SystemTest.ts",
+    "build": "tsc",
+    "start": "node dist/backend/SpaceControlCenter.js"
+  },
+  "dependencies": {
+    "d3": "^7.9.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3"
+  }
+}

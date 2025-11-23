@@ -1,0 +1,30 @@
+/* Estilos específicos para gráficos D3 */
+.d3-chart {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.d3-bar {
+    transition: all 0.3s ease;
+}
+
+.d3-bar:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+.d3-axis path,
+.d3-axis line {
+    stroke: rgba(255, 255, 255, 0.3);
+}
+
+.d3-axis text {
+    fill: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+}
+
+.bar-value {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}

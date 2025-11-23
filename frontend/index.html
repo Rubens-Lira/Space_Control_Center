@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Centro de Controle Espacial</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/terminal.css">
+  <link rel="stylesheet" href="css/triagem.css">
+  <link rel="stylesheet" href="css/d3-charts.css">
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Cabeçalho do Sistema -->
+    <header class="system-header">
+      <h1>🛰️ Centro de Controle Espacial</h1>
+      <div class="system-status">
+        <span id="systemTime">--:--:--</span>
+        <span id="activeTickets">Tickets Ativos: 0</span>
+      </div>
+    </header>
+
+    <!-- Navegação entre Módulos -->
+    <nav class="module-nav">
+      <button class="nav-btn active" data-module="terminal">🚀 Terminal</button>
+      <button class="nav-btn" data-module="triagem">👨‍💼 Triagem</button>
+      <button class="nav-btn" data-module="especialista">🔧 Especialistas</button>
+    </nav>
+
+    <!-- Conteúdo dos Módulos -->
+    <main class="module-container">
+
+      <!-- Terminal de Solicitação -->
+      <section id="terminal" class="module-content active">
+        <div class="terminal-section">
+          <div class="terminal-header">
+            <h2>🚀 Terminal de Solicitação de Suporte</h2>
+            <div class="queue-status">
+              <span id="queueCount">Fila: 0 tickets</span>
+            </div>
+          </div>
+
+          <div class="priority-buttons">
+            <button class="btn-emergency" data-priority="EMERGENCY">
+              🟥 EMERGÊNCIA
+              <small>Falhas críticas em equipamentos</small>
+            </button>
+            <button class="btn-high" data-priority="HIGH">
+              🟧 ALTA PRIORIDADE
+              <small>Problemas técnicos urgentes</small>
+            </button>
+            <button class="btn-normal" data-priority="NORMAL">
+              🟩 NORMAL
+              <small>Consultas de rotina</small>
+            </button>
+          </div>
+
+          <div class="request-form hidden" id="requestForm">
+            <h3>📝 Dados da Solicitação</h3>
+            <form id="supportForm">
+              <div class="form-group">
+                <label for="spaceshipName">Nome da Nave:</label>
+                <input type="text" id="spaceshipName" required>
+              </div>
+              <div class="form-group">
+                <label for="missionCode">Código da Missão:</label>
+                <input type="text" id="missionCode" required>
+              </div>
+              <div class="form-group">
+                <label for="orbitalSector">Setor Orbital:</label>
+                <input type="text" id="orbitalSector" required>
+              </div>
+              <div class="form-group">
+                <label for="problemDescription">Descrição do Problema:</label>
+                <textarea id="problemDescription" required></textarea>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="humansInvolved">
+                  🧑‍🚀 Tripulação humana envolvida
+                </label>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn-submit">Enviar Solicitação</button>
+                <button type="button" class="btn-cancel" id="cancelBtn">Cancelar</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Mini Dashboard D3 -->
+          <div class="mini-dashboard">
+            <h4>📊 Estatísticas em Tempo Real</h4>
+            <div id="priorityChart" class="chart-container"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Painel de Triagem -->
+      <section id="triagem" class="module-content">
+        <div class="triagem-header">
+          <h2>👨‍💼 Painel Central de Triagem</h2>
+          <div class="triagem-stats">
+            <span id="triagemQueue">Fila: 0 tickets</span>
+            <span id="triagemEmergencies">Emergências: 0</span>
+          </div>
+        </div>
+
+        <div class="triagem-container">
+          <!-- Painel de Tickets Pendentes -->
+          <div class="tickets-panel">
+            <h3>📋 Tickets para Triagem</h3>
+            <div class="priority-tabs">
+              <button class="tab-btn active" data-priority="all">Todos</button>
+              <button class="tab-btn" data-priority="EMERGENCY">🟥 Emergências</button>
+              <button class="tab-btn" data-priority="HIGH">🟧 Alta Prioridade</button>
+              <button class="tab-btn" data-priority="NORMAL">🟩 Normal</button>
+            </div>
+            <div class="tickets-list" id="ticketsList">
+              <!-- Tickets serão inseridos aqui via JavaScript -->
+            </div>
+          </div>
+
+          <!-- Formulário de Atendimento -->
+          <div class="atendimento-panel">
+            <h3>🎯 Atendimento em Andamento</h3>
+            <div class="current-ticket" id="currentTicket">
+              <p class="no-ticket">Nenhum ticket selecionado</p>
+            </div>
+
+            <form class="atendimento-form hidden" id="atendimentoForm">
+              <h4>Registrar Dados da Nave</h4>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="triagemSpaceshipName">Nome da Nave:</label>
+                  <input type="text" id="triagemSpaceshipName" required>
+                </div>
+                <div class="form-group">
+                  <label for="triagemMissionCode">Código da Missão:</label>
+                  <input type="text" id="triagemMissionCode" required>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="triagemOrbitalSector">Setor Orbital:</label>
+                  <input type="text" id="triagemOrbitalSector" required>
+                </div>
+                <div class="form-group">
+                  <label for="triagemReceptionist">Operador:</label>
+                  <select id="triagemReceptionist" required>
+                    <!-- Preenchido via JavaScript -->
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="triagemDescription">Descrição da Ocorrência:</label>
+                <textarea id="triagemDescription" required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="triagemHumansInvolved">
+                  🧑‍🚀 Há tripulação humana envolvida
+                </label>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-complete">✅ Finalizar Triagem</button>
+                <button type="button" class="btn-assign">🔧 Designar para Especialista</button>
+                <button type="button" class="btn-cancel">❌ Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Gráficos da Triagem -->
+        <div class="triagem-charts">
+          <div class="chart-card">
+            <h4>📊 Distribuição por Prioridade</h4>
+            <div id="triagemPriorityChart" class="chart-container"></div>
+          </div>
+          <div class="chart-card">
+            <h4>⏱️ Tempo de Espera</h4>
+            <div id="triagemTimeChart" class="chart-container"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Painel de Especialistas (a implementar) -->
+      <section id="especialista" class="module-content">
+        <div class="coming-soon">
+          <h2>🔧 Painel de Atendimento Especializado</h2>
+          <p>Em desenvolvimento...</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./js/App.js"></script>
+</body>
+
+</html>
