@@ -1,6 +1,6 @@
-import { LinkedList } from "../models/LinkedList";
-import { Ticket } from "../models/Ticket";
-import { Priority } from "../enums/Priority";
+import { LinkedList } from "../models/LinkedList.js";
+import { Ticket } from "../models/Ticket.js";
+import { Priority } from "../enums/Priority.js";
 export class TicketService {
     constructor() {
         this.allTickets = new LinkedList();

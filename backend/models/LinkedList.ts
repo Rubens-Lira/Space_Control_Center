@@ -1,5 +1,5 @@
-import { Identifiable } from "../interfaces/Identifiable";
-import { Node } from "./Node";
+import { Identifiable } from "../interfaces/Identifiable.js";
+import { Node } from "./Node.js";
 
 export class LinkedList<T extends Identifiable> {
   private head: Node<T> | null = null;

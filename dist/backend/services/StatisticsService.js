@@ -1,4 +1,4 @@
-import { Priority } from "../enums/Priority";
+import { Priority } from "../enums/Priority.js";
 export class StatisticsService {
     constructor(ticketService, receptionistService, specialistService) {
         this.ticketService = ticketService;

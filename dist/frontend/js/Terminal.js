@@ -53,14 +53,17 @@ export class Terminal {
         const orbitalSector = document.getElementById('orbitalSector').value;
         const problemDescription = document.getElementById('problemDescription').value;
         const humansInvolved = document.getElementById('humansInvolved').checked;
-        // Aqui precisaríamos ter um Receptionist ativo
-        // Por enquanto, usamos o primeiro recepcionista disponível
+        if (!spaceshipName.trim() || !missionCode.trim() || !orbitalSector.trim() || !problemDescription.trim()) {
+            this.showErrorMessage('Por favor, preencha todos os campos obrigatórios');
+            return;
+        }
+        // Usar o primeiro recepcionista disponível
         const receptionists = this.controlCenter.receptionistService.getAllReceptionists();
         const receptionistId = receptionists.length > 0 ? receptionists[0].getId() : 1;
-        // Criar a nave primeiro (em um sistema real, isso viria de um cadastro)
-        const spaceshipId = this.controlCenter.ticketService.getAllTickets().length + 1;
+        // Gerar ID único para a nave
+        const spaceshipId = Date.now();
         try {
-            const ticket = this.controlCenter.receptionistService.processNewRequest(receptionistId, spaceshipId, problemDescription, humansInvolved, this.currentPriority);
+            const ticket = this.controlCenter.receptionistService.processNewRequest(receptionistId, spaceshipId, `[${orbitalSector}] ${spaceshipName} - ${missionCode}: ${problemDescription}`, humansInvolved, this.currentPriority);
             if (ticket) {
                 this.showSuccessMessage(ticket);
                 this.hideRequestForm();

@@ -1,8 +1,8 @@
-import { LinkedList } from "../models/LinkedList";
-import { Receptionist } from "../models/Receptionist";
-import { TicketService } from "./TicketService";
-import { Priority } from "../enums/Priority";
-import { Ticket } from "../models/Ticket";
+import { LinkedList } from "../models/LinkedList.js";
+import { Receptionist } from "../models/Receptionist.js";
+import { TicketService } from "./TicketService.js";
+import { Priority } from "../enums/Priority.js";
+import { Ticket } from "../models/Ticket.js";
 
 export class ReceptionistService {
   private receptionists: LinkedList<Receptionist> = new LinkedList<Receptionist>();

@@ -1,7 +1,7 @@
-import { TicketService } from "./services/TicketService";
-import { ReceptionistService } from "./services/ReceptionistService";
-import { SpecialistService } from "./services/SpecialistService";
-import { StatisticsService } from "./services/StatisticsService";
+import { TicketService } from "./services/TicketService.js";
+import { ReceptionistService } from "./services/ReceptionistService.js";
+import { SpecialistService } from "./services/SpecialistService.js";
+import { StatisticsService } from "./services/StatisticsService.js";
 
 export class SpaceControlCenter {
   public ticketService: TicketService;

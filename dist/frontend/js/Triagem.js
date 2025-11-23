@@ -101,22 +101,22 @@ export class Triagem {
     }
     createTicketElement(ticket) {
         const ticketDiv = document.createElement('div');
-        ticketDiv.className = `ticket-item ${ticket.getPriority()}`;
+        ticketDiv.className = `ticket-item ${ticket.getPriority().toLowerCase()}`;
         ticketDiv.setAttribute('data-ticket-id', ticket.getId().toString());
         const priorityLabel = this.getPriorityLabel(ticket.getPriority());
         const timeAgo = this.getTimeAgo(ticket.getCreatedAt());
         ticketDiv.innerHTML = `
-            <div class="ticket-header">
-                <span class="ticket-id">Ticket #${ticket.getId()}</span>
-                <span class="ticket-priority ${ticket.getPriority()}">${priorityLabel}</span>
-            </div>
-            <div class="ticket-description">${ticket.getDescription()}</div>
-            <div class="ticket-meta">
-                <span>Nave ID: ${ticket.getSpaceshipId()}</span>
-                <span>${timeAgo}</span>
-            </div>
-            ${ticket.getHumansInvolved() ? '<div class="ticket-humans">🧑‍🚀 Humanos envolvidos</div>' : ''}
-        `;
+      <div class="ticket-header">
+        <span class="ticket-id">Ticket #${ticket.getId()}</span>
+        <span class="ticket-priority ${ticket.getPriority().toLowerCase()}">${priorityLabel}</span>
+      </div>
+      <div class="ticket-description">${ticket.getDescription()}</div>
+      <div class="ticket-meta">
+        <span>Nave ID: ${ticket.getSpaceshipId()}</span>
+        <span>${timeAgo}</span>
+      </div>
+      ${ticket.getHumansInvolved() ? '<div class="ticket-humans">🧑‍🚀 Humanos envolvidos</div>' : ''}
+    `;
         ticketDiv.addEventListener('click', () => {
             this.selectTicket(ticket);
         });
@@ -152,26 +152,25 @@ export class Triagem {
         };
         // Configurar botão de designar
         const assignButton = document.querySelector('.btn-assign');
-        assignButton.onclick = () => {
-            this.designarParaEspecialista(ticket);
-        };
+        if (assignButton) {
+            assignButton.onclick = () => {
+                this.designarParaEspecialista(ticket);
+            };
+        }
         // Configurar botão de cancelar
         const cancelButton = document.querySelector('.btn-cancel');
-        cancelButton.onclick = () => {
-            this.cancelarAtendimento();
-        };
+        if (cancelButton) {
+            cancelButton.onclick = () => {
+                this.cancelarAtendimento();
+            };
+        }
     }
     finalizarTriagem(ticket) {
-        // Em um sistema real, aqui salvaríamos os dados da nave
-        // Por enquanto, apenas marcamos como processado
         alert(`✅ Triagem finalizada para Ticket #${ticket.getId()}`);
         this.cancelarAtendimento();
-        // Atualizar display
         this.updateDisplay();
     }
     designarParaEspecialista(ticket) {
-        // Em um sistema real, mostraríamos uma lista de especialistas
-        // Por enquanto, designamos para o primeiro especialista disponível
         const specialists = this.controlCenter.specialistService.getAllSpecialists();
         if (specialists.length > 0) {
             const specialist = specialists[0];
@@ -226,7 +225,6 @@ export class Triagem {
         return `${diffDays} dias atrás`;
     }
     startAutoRefresh() {
-        // Atualizar a cada 10 segundos
         setInterval(() => {
             this.updateDisplay();
         }, 10000);

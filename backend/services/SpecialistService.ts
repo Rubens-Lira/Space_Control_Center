@@ -1,7 +1,7 @@
-import { LinkedList } from "../models/LinkedList";
-import { Specialist } from "../models/Specialist";
-import { TicketService } from "./TicketService";
-import { Ticket } from "../models/Ticket";
+import { LinkedList } from "../models/LinkedList.js";
+import { Specialist } from "../models/Specialist.js";
+import { TicketService } from "./TicketService.js";
+import { Ticket } from "../models/Ticket.js";
 
 export class SpecialistService {
   private specialists: LinkedList<Specialist> = new LinkedList<Specialist>();

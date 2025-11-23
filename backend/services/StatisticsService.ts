@@ -1,7 +1,7 @@
-import { TicketService } from "./TicketService";
-import { ReceptionistService } from "./ReceptionistService";
-import { SpecialistService } from "./SpecialistService";
-import { Priority } from "../enums/Priority";
+import { TicketService } from "./TicketService.js";
+import { ReceptionistService } from "./ReceptionistService.js";
+import { SpecialistService } from "./SpecialistService.js";
+import { Priority } from "../enums/Priority.js";
 
 export class StatisticsService {
   constructor(

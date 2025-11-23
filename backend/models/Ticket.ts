@@ -1,4 +1,4 @@
-import { Priority } from "../enums/Priority";
+import { Priority } from "../enums/Priority.js";
 
 export class Ticket {
   private id: number = Ticket.generateID();

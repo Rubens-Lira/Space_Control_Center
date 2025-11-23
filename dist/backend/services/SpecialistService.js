@@ -1,5 +1,5 @@
-import { LinkedList } from "../models/LinkedList";
-import { Specialist } from "../models/Specialist";
+import { LinkedList } from "../models/LinkedList.js";
+import { Specialist } from "../models/Specialist.js";
 export class SpecialistService {
     constructor(ticketService) {
         this.ticketService = ticketService;

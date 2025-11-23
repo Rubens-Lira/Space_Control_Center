@@ -1,8 +1,14 @@
 import { Terminal } from './Terminal.js';
 import { Triagem } from './Triagem.js';
 import { PriorityChart } from './PriorityChart.js';
-import { SpaceControlCenter } from '../../dist/backend/SpaceControlCenter.js'
+import { SpaceControlCenter } from '../../backend/SpaceControlCenter.js';
+
 class SpaceControlApp {
+  private controlCenter: SpaceControlCenter;
+  private terminal: Terminal;
+  private triagem: Triagem;
+  private priorityChart: PriorityChart;
+
   constructor() {
     this.controlCenter = new SpaceControlCenter();
     this.terminal = new Terminal(this.controlCenter);
@@ -12,7 +18,7 @@ class SpaceControlApp {
     this.initializeApp();
   }
 
-  initializeApp() {
+  private initializeApp(): void {
     console.log('🚀 Centro de Controle Espacial Iniciado');
 
     // Inicializar componentes
@@ -24,7 +30,7 @@ class SpaceControlApp {
     this.startRealTimeUpdates();
   }
 
-  startRealTimeUpdates() {
+  private startRealTimeUpdates(): void {
     setInterval(() => {
       this.priorityChart.update();
       this.terminal.updateQueueStatus();

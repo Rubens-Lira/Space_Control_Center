@@ -1,10 +1,17 @@
+import { SpaceControlCenter } from "../../backend/SpaceControlCenter.js";
+import { Priority } from "../../backend/enums/Priority.js";
+import { Ticket } from "../../backend/models/Ticket.js";
+import { Receptionist } from "../../backend/models/Receptionist.js";
+
 export class Triagem {
-  constructor(controlCenter) {
+  private controlCenter: SpaceControlCenter;
+  private currentTicket: Ticket | null = null;
+
+  constructor(controlCenter: SpaceControlCenter) {
     this.controlCenter = controlCenter;
-    this.currentTicket = null;
   }
 
-  initialize() {
+  public initialize(): void {
     this.setupNavigation();
     this.setupTabs();
     this.loadReceptionists();
@@ -12,11 +19,11 @@ export class Triagem {
     this.startAutoRefresh();
   }
 
-  setupNavigation() {
+  private setupNavigation(): void {
     const navButtons = document.querySelectorAll('.nav-btn');
     navButtons.forEach(button => {
       button.addEventListener('click', (e) => {
-        const target = e.target;
+        const target = e.target as HTMLButtonElement;
         const module = target.dataset.module;
 
         // Remover classe active de todos os botões
@@ -25,26 +32,26 @@ export class Triagem {
         target.classList.add('active');
 
         // Mostrar módulo correspondente
-        this.showModule(module);
+        this.showModule(module!);
       });
     });
   }
 
-  showModule(moduleName) {
+  private showModule(moduleName: string): void {
     // Esconder todos os módulos
     const modules = document.querySelectorAll('.module-content');
     modules.forEach(module => module.classList.remove('active'));
 
     // Mostrar módulo selecionado
     const targetModule = document.getElementById(moduleName);
-    if (targetModule) targetModule.classList.add('active');
+    targetModule?.classList.add('active');
   }
 
-  setupTabs() {
+  private setupTabs(): void {
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(button => {
       button.addEventListener('click', (e) => {
-        const target = e.target;
+        const target = e.target as HTMLButtonElement;
         const priority = target.dataset.priority;
 
         // Atualizar tabs
@@ -52,13 +59,13 @@ export class Triagem {
         target.classList.add('active');
 
         // Atualizar lista de tickets
-        this.updateTicketsList(priority);
+        this.updateTicketsList(priority!);
       });
     });
   }
 
-  loadReceptionists() {
-    const select = document.getElementById('triagemReceptionist');
+  private loadReceptionists(): void {
+    const select = document.getElementById('triagemReceptionist') as HTMLSelectElement;
     if (!select) return;
 
     select.innerHTML = '';
@@ -72,12 +79,12 @@ export class Triagem {
     });
   }
 
-  updateDisplay() {
+  private updateDisplay(): void {
     this.updateStats();
     this.updateTicketsList('all');
   }
 
-  updateStats() {
+  private updateStats(): void {
     const queueElement = document.getElementById('triagemQueue');
     const emergenciesElement = document.getElementById('triagemEmergencies');
 
@@ -88,7 +95,7 @@ export class Triagem {
     }
   }
 
-  updateTicketsList(priorityFilter) {
+  private updateTicketsList(priorityFilter: string): void {
     const ticketsList = document.getElementById('ticketsList');
     if (!ticketsList) return;
 
@@ -123,9 +130,9 @@ export class Triagem {
     });
   }
 
-  createTicketElement(ticket) {
+  private createTicketElement(ticket: Ticket): HTMLDivElement {
     const ticketDiv = document.createElement('div');
-    ticketDiv.className = `ticket-item ${ticket.getPriority()}`;
+    ticketDiv.className = `ticket-item ${ticket.getPriority().toLowerCase()}`;
     ticketDiv.setAttribute('data-ticket-id', ticket.getId().toString());
 
     const priorityLabel = this.getPriorityLabel(ticket.getPriority());
@@ -134,7 +141,7 @@ export class Triagem {
     ticketDiv.innerHTML = `
       <div class="ticket-header">
         <span class="ticket-id">Ticket #${ticket.getId()}</span>
-        <span class="ticket-priority ${ticket.getPriority()}">${priorityLabel}</span>
+        <span class="ticket-priority ${ticket.getPriority().toLowerCase()}">${priorityLabel}</span>
       </div>
       <div class="ticket-description">${ticket.getDescription()}</div>
       <div class="ticket-meta">
@@ -151,7 +158,7 @@ export class Triagem {
     return ticketDiv;
   }
 
-  selectTicket(ticket) {
+  private selectTicket(ticket: Ticket): void {
     this.currentTicket = ticket;
     this.showTicketDetails(ticket);
 
@@ -162,9 +169,9 @@ export class Triagem {
     document.querySelector(`[data-ticket-id="${ticket.getId()}"]`)?.classList.add('selected');
   }
 
-  showTicketDetails(ticket) {
+  private showTicketDetails(ticket: Ticket): void {
     const currentTicketElement = document.getElementById('currentTicket');
-    const atendimentoForm = document.getElementById('atendimentoForm');
+    const atendimentoForm = document.getElementById('atendimentoForm') as HTMLFormElement;
 
     if (!currentTicketElement || !atendimentoForm) return;
 
@@ -173,17 +180,11 @@ export class Triagem {
     atendimentoForm.classList.remove('hidden');
 
     // Preencher dados do ticket no formulário
-    const spaceshipName = document.getElementById('triagemSpaceshipName');
-    const missionCode = document.getElementById('triagemMissionCode');
-    const orbitalSector = document.getElementById('triagemOrbitalSector');
-    const description = document.getElementById('triagemDescription');
-    const humansInvolved = document.getElementById('triagemHumansInvolved');
-
-    if (spaceshipName) spaceshipName.value = `Nave ${ticket.getSpaceshipId()}`;
-    if (missionCode) missionCode.value = `MISS-${ticket.getSpaceshipId()}`;
-    if (orbitalSector) orbitalSector.value = 'Setor Alpha';
-    if (description) description.value = ticket.getDescription();
-    if (humansInvolved) humansInvolved.checked = ticket.getHumansInvolved();
+    (document.getElementById('triagemSpaceshipName') as HTMLInputElement).value = `Nave ${ticket.getSpaceshipId()}`;
+    (document.getElementById('triagemMissionCode') as HTMLInputElement).value = `MISS-${ticket.getSpaceshipId()}`;
+    (document.getElementById('triagemOrbitalSector') as HTMLInputElement).value = 'Setor Alpha';
+    (document.getElementById('triagemDescription') as HTMLTextAreaElement).value = ticket.getDescription();
+    (document.getElementById('triagemHumansInvolved') as HTMLInputElement).checked = ticket.getHumansInvolved();
 
     // Configurar submit do formulário
     atendimentoForm.onsubmit = (e) => {
@@ -192,7 +193,7 @@ export class Triagem {
     };
 
     // Configurar botão de designar
-    const assignButton = document.querySelector('.btn-assign');
+    const assignButton = document.querySelector('.btn-assign') as HTMLButtonElement;
     if (assignButton) {
       assignButton.onclick = () => {
         this.designarParaEspecialista(ticket);
@@ -200,7 +201,7 @@ export class Triagem {
     }
 
     // Configurar botão de cancelar
-    const cancelButton = document.querySelector('.btn-cancel');
+    const cancelButton = document.querySelector('.btn-cancel') as HTMLButtonElement;
     if (cancelButton) {
       cancelButton.onclick = () => {
         this.cancelarAtendimento();
@@ -208,15 +209,13 @@ export class Triagem {
     }
   }
 
-  finalizarTriagem(ticket) {
+  private finalizarTriagem(ticket: Ticket): void {
     alert(`✅ Triagem finalizada para Ticket #${ticket.getId()}`);
     this.cancelarAtendimento();
-
-    // Atualizar display
     this.updateDisplay();
   }
 
-  designarParaEspecialista(ticket) {
+  private designarParaEspecialista(ticket: Ticket): void {
     const specialists = this.controlCenter.specialistService.getAllSpecialists();
     if (specialists.length > 0) {
       const specialist = specialists[0];
@@ -237,11 +236,11 @@ export class Triagem {
     }
   }
 
-  cancelarAtendimento() {
+  private cancelarAtendimento(): void {
     this.currentTicket = null;
 
     const currentTicketElement = document.getElementById('currentTicket');
-    const atendimentoForm = document.getElementById('atendimentoForm');
+    const atendimentoForm = document.getElementById('atendimentoForm') as HTMLFormElement;
 
     if (currentTicketElement && atendimentoForm) {
       currentTicketElement.classList.remove('hidden');
@@ -255,7 +254,7 @@ export class Triagem {
     });
   }
 
-  getPriorityLabel(priority) {
+  private getPriorityLabel(priority: Priority): string {
     const labels = {
       'EMERGENCY': '🟥 EMERGÊNCIA',
       'HIGH': '🟧 ALTA',
@@ -264,7 +263,7 @@ export class Triagem {
     return labels[priority];
   }
 
-  getTimeAgo(date) {
+  private getTimeAgo(date: Date): string {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
@@ -279,8 +278,7 @@ export class Triagem {
     return `${diffDays} dias atrás`;
   }
 
-  startAutoRefresh() {
-    // Atualizar a cada 10 segundos
+  private startAutoRefresh(): void {
     setInterval(() => {
       this.updateDisplay();
     }, 10000);
