@@ -1,0 +1,700 @@
+/* ========== PAINEL DE ESPECIALISTAS ========== */
+
+.especialista-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.especialista-header h2 {
+    background: linear-gradient(45deg, #ff6b6b, #ffa726);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.8em;
+}
+
+.especialista-stats {
+    display: flex;
+    gap: 20px;
+    font-weight: bold;
+}
+
+.especialista-stats span {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+}
+
+.especialista-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+/* Painel de Especialistas */
+.especialistas-panel {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.especialistas-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.especialista-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 4px solid;
+}
+
+.especialista-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.especialista-item.selected {
+    background: rgba(255, 167, 38, 0.2) !important;
+    border: 2px solid #ffa726;
+    transform: scale(1.02);
+}
+
+.especialista-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.especialista-name {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.especialista-specialty {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    background: rgba(255, 167, 38, 0.3);
+    color: #ffa726;
+}
+
+.especialista-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8em;
+    opacity: 0.6;
+    margin-bottom: 5px;
+}
+
+.especialista-queue {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.8em;
+}
+
+/* Painel de Atendimento do Especialista */
+.atendimento-especialista-panel {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.current-atendimento {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.atendimento-especialista-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.atendimento-especialista-form .form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.btn-iniciar {
+    background: linear-gradient(45deg, #ffa726, #ff9800);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-iniciar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 167, 38, 0.4);
+}
+
+.btn-finalizar {
+    background: linear-gradient(45deg, #4caf50, #66bb6a);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-finalizar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.btn-proximo {
+    background: linear-gradient(45deg, #2196f3, #42a5f5);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-proximo:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+}
+
+/* Fila de Atendimento */
+.fila-atendimento {
+    margin-top: 20px;
+}
+
+.fila-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.fila-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.fila-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.fila-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.fila-item.priority-EMERGENCY {
+    border-left: 3px solid #dc2626;
+}
+
+.fila-item.priority-HIGH {
+    border-left: 3px solid #f59e0b;
+}
+
+.fila-item.priority-NORMAL {
+    border-left: 3px solid #10b981;
+}
+
+.fila-nave {
+    font-weight: bold;
+}
+
+.fila-priority {
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.7em;
+    font-weight: bold;
+}
+
+.fila-priority.EMERGENCY {
+    background: #dc2626;
+    color: white;
+}
+
+.fila-priority.HIGH {
+    background: #f59e0b;
+    color: white;
+}
+
+.fila-priority.NORMAL {
+    background: #10b981;
+    color: white;
+}
+
+/* Status do Especialista */
+.especialista-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.status-disponivel {
+    background: rgba(76, 175, 80, 0.3);
+    color: #4caf50;
+}
+
+.status-ocupado {
+    background: rgba(255, 152, 0, 0.3);
+    color: #ff9800;
+}
+
+.status-em-atendimento {
+    background: rgba(255, 87, 34, 0.3);
+    color: #ff5722;
+}
+
+/* Gráficos dos Especialistas */
+.especialista-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.especialista-chart-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.especialista-chart-card h4 {
+    margin-bottom: 15px;
+    color: #ffa726;
+}
+
+/* Histórico de Atendimentos */
+.historico-atendimentos {
+    margin-top: 30px;
+}
+
+.historico-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.historico-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-left: 3px solid #ffa726;
+}
+
+.historico-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.historico-nave {
+    font-weight: bold;
+}
+
+.historico-tempo {
+    font-size: 0.8em;
+    opacity: 0.6;
+}
+
+.historico-descricao {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .especialista-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .especialista-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .atendimento-especialista-form .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .especialista-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .especialista-stats {
+        justify-content: center;
+    }
+
+    .especialista-header-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .fila-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+
+/* Animações */
+@keyframes pulse-atendimento {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.especialista-item.em-atendimento {
+    animation: pulse-atendimento 2s infinite;
+    border-color: #ff5722 !important;
+}
+
+/* Badge de contagem */
+.badge {
+    background: #ff5722;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7em;
+    margin-left: 8px;
+}
+
+/* Scrollbar personalizada para as listas */
+.especialistas-list::-webkit-scrollbar,
+.fila-list::-webkit-scrollbar,
+.historico-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.especialistas-list::-webkit-scrollbar-track,
+.fila-list::-webkit-scrollbar-track,
+.historico-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.especialistas-list::-webkit-scrollbar-thumb,
+.fila-list::-webkit-scrollbar-thumb,
+.historico-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.especialistas-list::-webkit-scrollbar-thumb:hover,
+.fila-list::-webkit-scrollbar-thumb:hover,
+.historico-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.especialista-selector {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.especialista-selector .form-group {
+    margin-bottom: 0;
+}
+
+/* Estilo para o select e suas opções */
+.especialista-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    /* Remove o estilo padrão do navegador */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.especialista-select:focus {
+    outline: none;
+    border-color: #ffa726;
+    box-shadow: 0 0 0 2px rgba(255, 167, 38, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.especialista-select:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Estilo para as opções do select */
+.especialista-select option {
+    background: rgba(30, 30, 40, 0.95);
+    color: white;
+    padding: 12px;
+    border: none;
+}
+
+/* Para Webkit (Chrome, Safari, Edge) */
+.especialista-select::-webkit-listbox {
+    background: rgba(30, 30, 40, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+}
+
+.especialista-select::-webkit-scrollbar {
+    width: 8px;
+}
+
+.especialista-select::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.especialista-select::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.especialista-select::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Para Firefox */
+@-moz-document url-prefix() {
+    .especialista-select {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .especialista-select option {
+        background: rgba(30, 30, 40, 0.95);
+    }
+}
+
+/* Seta personalizada para o select */
+.especialista-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.especialista-select-wrapper::after {
+    content: "▼";
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    color: #ffa726;
+    pointer-events: none;
+    font-size: 0.8em;
+}
+
+/* Estilos para outros selects do sistema também */
+#triagemReceptionist,
+#triagemSpecialist,
+#specialistEspecialidade {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+#triagemReceptionist option,
+#triagemSpecialist option,
+#specialistEspecialidade option {
+    background: rgba(30, 30, 40, 0.95);
+    color: white;
+    padding: 12px;
+}
+
+.tickets-especialista-panel {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.tickets-status {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tickets-status span {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.tickets-list-especialista {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.ticket-especialista-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 4px solid;
+}
+
+.ticket-especialista-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.ticket-especialista-item.selected {
+    background: rgba(255, 167, 38, 0.2) !important;
+    border: 2px solid #ffa726;
+    transform: scale(1.02);
+}
+
+.ticket-especialista-item.EMERGENCY {
+    border-left-color: #dc2626;
+    background: rgba(220, 38, 38, 0.1);
+}
+
+.ticket-especialista-item.HIGH {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.ticket-especialista-item.NORMAL {
+    border-left-color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.ticket-especialista-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.ticket-especialista-priority {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.ticket-especialista-priority.EMERGENCY {
+    background: #dc2626;
+    color: white;
+}
+
+.ticket-especialista-priority.HIGH {
+    background: #f59e0b;
+    color: white;
+}
+
+.ticket-especialista-priority.NORMAL {
+    background: #10b981;
+    color: white;
+}
+
+.ticket-especialista-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8em;
+    opacity: 0.6;
+    margin-bottom: 5px;
+}
+
+.ticket-especialista-status {
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.7em;
+    font-weight: bold;
+}
+
+.status-pendente {
+    background: rgba(255, 167, 38, 0.3);
+    color: #ffa726;
+}
+
+.status-concluido {
+    background: rgba(16, 185, 129, 0.3);
+    color: #10b981;
+}
+
+/* Ajuste no container para o novo layout */
+.especialista-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .especialista-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .tickets-status {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

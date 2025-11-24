@@ -188,6 +188,12 @@
     border-radius: 5px;
     font-size: 1em;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-complete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .btn-assign {
@@ -198,6 +204,115 @@
     border-radius: 5px;
     font-size: 1em;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-assign:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+/* NOVO: Estilos para selects na triagem */
+#triagemSpecialist,
+#triagemReceptionist {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+#triagemSpecialist:focus,
+#triagemReceptionist:focus {
+    outline: none;
+    border-color: #00ffff;
+    box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+#triagemSpecialist:hover,
+#triagemReceptionist:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+#triagemSpecialist option,
+#triagemReceptionist option {
+    background: #1a1a3e;
+    color: white;
+    padding: 12px;
+}
+
+/* Campos readonly */
+input[readonly],
+textarea[readonly] {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    cursor: not-allowed;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Estilos para form groups na triagem */
+.atendimento-form .form-group {
+    margin-bottom: 15px;
+}
+
+.atendimento-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #00ffff;
+}
+
+.atendimento-form input,
+.atendimento-form textarea,
+.atendimento-form select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.atendimento-form input:focus,
+.atendimento-form textarea:focus,
+.atendimento-form select:focus {
+    outline: none;
+    border-color: #00ffff;
+    box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.atendimento-form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Checkbox estilizado */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 8px 0;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+    accent-color: #00ffff;
 }
 
 /* Gráficos da Triagem */
@@ -241,6 +356,7 @@
 .ticket-item.selected {
     background: rgba(0, 255, 255, 0.2) !important;
     border: 2px solid #00ffff;
+    transform: scale(1.02);
 }
 
 .ticket-humans {
@@ -305,4 +421,101 @@
     text-align: center;
     padding: 60px 20px;
     opacity: 0.5;
+}
+
+/* Botão cancelar */
+.btn-cancel {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 12px;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .triagem-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .triagem-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .atendimento-form .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .triagem-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .triagem-stats {
+        justify-content: center;
+    }
+}
+
+/* Ajuste para os dois selects lado a lado */
+.atendimento-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.atendimento-form .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.atendimento-form label {
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #00ffff;
+}
+
+/* Estilos específicos para os selects na triagem */
+#triagemReceptionist,
+#triagemSpecialist {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#triagemReceptionist:focus,
+#triagemSpecialist:focus {
+    outline: none;
+    border-color: #00ffff;
+    box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+#triagemReceptionist:hover,
+#triagemSpecialist:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+#triagemReceptionist option,
+#triagemSpecialist option {
+    background: #1a1a3e;
+    color: white;
+    padding: 12px;
 }

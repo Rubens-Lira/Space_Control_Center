@@ -6,6 +6,7 @@ import { Receptionist } from "../../backend/models/Receptionist.js";
 export class Triagem {
   private controlCenter: SpaceControlCenter;
   private currentTicket: Ticket | null = null;
+  private autoRefreshInterval: number | null = null;
 
   constructor(controlCenter: SpaceControlCenter) {
     this.controlCenter = controlCenter;
@@ -15,8 +16,15 @@ export class Triagem {
     this.setupNavigation();
     this.setupTabs();
     this.loadReceptionists();
+    this.loadSpecialists();
     this.updateDisplay();
     this.startAutoRefresh();
+  }
+
+  public cleanup(): void {
+    if (this.autoRefreshInterval) {
+      clearInterval(this.autoRefreshInterval);
+    }
   }
 
   private setupNavigation(): void {
@@ -26,23 +34,16 @@ export class Triagem {
         const target = e.target as HTMLButtonElement;
         const module = target.dataset.module;
 
-        // Remover classe active de todos os botões
         navButtons.forEach(btn => btn.classList.remove('active'));
-        // Adicionar classe active ao botão clicado
         target.classList.add('active');
-
-        // Mostrar módulo correspondente
         this.showModule(module!);
       });
     });
   }
 
   private showModule(moduleName: string): void {
-    // Esconder todos os módulos
     const modules = document.querySelectorAll('.module-content');
     modules.forEach(module => module.classList.remove('active'));
-
-    // Mostrar módulo selecionado
     const targetModule = document.getElementById(moduleName);
     targetModule?.classList.add('active');
   }
@@ -54,29 +55,63 @@ export class Triagem {
         const target = e.target as HTMLButtonElement;
         const priority = target.dataset.priority;
 
-        // Atualizar tabs
         tabButtons.forEach(btn => btn.classList.remove('active'));
         target.classList.add('active');
-
-        // Atualizar lista de tickets
         this.updateTicketsList(priority!);
       });
     });
   }
 
   private loadReceptionists(): void {
-    const select = document.getElementById('triagemReceptionist') as HTMLSelectElement;
-    if (!select) return;
-
-    select.innerHTML = '';
+    const receptionistSelect = document.getElementById('triagemReceptionist') as HTMLSelectElement;
+    if (!receptionistSelect) return;
 
     const receptionists = this.controlCenter.receptionistService.getAllReceptionists();
+
+    receptionistSelect.innerHTML = '<option value="">Selecione o recepcionista</option>';
+
+    if (receptionists.length === 0) {
+      receptionistSelect.innerHTML = '<option value="">Nenhum recepcionista disponível</option>';
+      return;
+    }
+
     receptionists.forEach(receptionist => {
       const option = document.createElement('option');
       option.value = receptionist.getId().toString();
-      option.textContent = receptionist.getName();
-      select.appendChild(option);
+      option.textContent = `👨‍💼 ${receptionist.getName()}`;
+      receptionistSelect.appendChild(option);
     });
+  }
+
+  private loadSpecialists(): void {
+    const specialistSelect = document.getElementById('triagemSpecialist') as HTMLSelectElement;
+    if (!specialistSelect) return;
+
+    const specialists = this.controlCenter.specialistService.getAllSpecialists();
+
+    specialistSelect.innerHTML = '<option value="">Selecione um especialista</option>';
+
+    if (specialists.length === 0) {
+      specialistSelect.innerHTML = '<option value="">Nenhum especialista disponível</option>';
+      return;
+    }
+
+    specialists.forEach(specialist => {
+      const option = document.createElement('option');
+      option.value = specialist.getId().toString();
+      option.textContent = `👩‍🔬 ${specialist.getName()} - ${this.getSpecialtyLabel(specialist.getSpecialty())}`;
+      specialistSelect.appendChild(option);
+    });
+  }
+
+  private getSpecialtyLabel(specialty: string): string {
+    const specialties: { [key: string]: string } = {
+      'COMMUNICATIONS': 'Comunicações',
+      'POWER': 'Sistemas de Energia',
+      'NAVIGATION': 'Navegação',
+      'LIFE_SUPPORT': 'Suporte de Vida'
+    };
+    return specialties[specialty] || specialty;
   }
 
   private updateDisplay(): void {
@@ -138,6 +173,8 @@ export class Triagem {
     const priorityLabel = this.getPriorityLabel(ticket.getPriority());
     const timeAgo = this.getTimeAgo(ticket.getCreatedAt());
 
+    const spaceship = this.controlCenter.spaceshipService.getSpaceshipById(ticket.getSpaceshipId());
+
     ticketDiv.innerHTML = `
       <div class="ticket-header">
         <span class="ticket-id">Ticket #${ticket.getId()}</span>
@@ -145,7 +182,7 @@ export class Triagem {
       </div>
       <div class="ticket-description">${ticket.getDescription()}</div>
       <div class="ticket-meta">
-        <span>Nave ID: ${ticket.getSpaceshipId()}</span>
+        <span>🚀 ${spaceship?.getName() || 'Nave não encontrada'}</span>
         <span>${timeAgo}</span>
       </div>
       ${ticket.getHumansInvolved() ? '<div class="ticket-humans">🧑‍🚀 Humanos envolvidos</div>' : ''}
@@ -162,7 +199,6 @@ export class Triagem {
     this.currentTicket = ticket;
     this.showTicketDetails(ticket);
 
-    // Destacar ticket selecionado
     document.querySelectorAll('.ticket-item').forEach(item => {
       item.classList.remove('selected');
     });
@@ -175,28 +211,28 @@ export class Triagem {
 
     if (!currentTicketElement || !atendimentoForm) return;
 
-    // Mostrar formulário e esconder "nenhum ticket"
     currentTicketElement.classList.add('hidden');
     atendimentoForm.classList.remove('hidden');
 
+    const spaceship = this.controlCenter.spaceshipService.getSpaceshipById(ticket.getSpaceshipId());
+
     // Preencher dados do ticket no formulário
-    (document.getElementById('triagemSpaceshipName') as HTMLInputElement).value = `Nave ${ticket.getSpaceshipId()}`;
-    (document.getElementById('triagemMissionCode') as HTMLInputElement).value = `MISS-${ticket.getSpaceshipId()}`;
-    (document.getElementById('triagemOrbitalSector') as HTMLInputElement).value = 'Setor Alpha';
+    (document.getElementById('triagemSpaceshipName') as HTMLInputElement).value = spaceship?.getName() || 'Nave não encontrada';
+    (document.getElementById('triagemMissionCode') as HTMLInputElement).value = spaceship?.getMissionCode() || 'N/A';
+    (document.getElementById('triagemOrbitalSector') as HTMLInputElement).value = spaceship?.getOrbitalSector() || 'N/A';
+    (document.getElementById('triagemPriority') as HTMLInputElement).value = this.getPriorityLabel(ticket.getPriority());
     (document.getElementById('triagemDescription') as HTMLTextAreaElement).value = ticket.getDescription();
     (document.getElementById('triagemHumansInvolved') as HTMLInputElement).checked = ticket.getHumansInvolved();
 
-    // Configurar submit do formulário
-    atendimentoForm.onsubmit = (e) => {
-      e.preventDefault();
-      this.finalizarTriagem(ticket);
-    };
+    // Recarregar selects
+    this.loadReceptionists();
+    this.loadSpecialists();
 
-    // Configurar botão de designar
-    const assignButton = document.querySelector('.btn-assign') as HTMLButtonElement;
-    if (assignButton) {
-      assignButton.onclick = () => {
-        this.designarParaEspecialista(ticket);
+    // Configurar botão de finalizar
+    const completeButton = document.querySelector('.btn-complete') as HTMLButtonElement;
+    if (completeButton) {
+      completeButton.onclick = () => {
+        this.finalizarTriagem(ticket);
       };
     }
 
@@ -210,29 +246,54 @@ export class Triagem {
   }
 
   private finalizarTriagem(ticket: Ticket): void {
-    alert(`✅ Triagem finalizada para Ticket #${ticket.getId()}`);
-    this.cancelarAtendimento();
-    this.updateDisplay();
-  }
+    const receptionistSelect = document.getElementById('triagemReceptionist') as HTMLSelectElement;
+    const specialistSelect = document.getElementById('triagemSpecialist') as HTMLSelectElement;
 
-  private designarParaEspecialista(ticket: Ticket): void {
-    const specialists = this.controlCenter.specialistService.getAllSpecialists();
-    if (specialists.length > 0) {
-      const specialist = specialists[0];
-      const success = this.controlCenter.specialistService.assignTicketToSpecialist(
-        ticket.getId(),
-        specialist.getId()
-      );
+    // Validações
+    if (!receptionistSelect.value) {
+      alert('Selecione o recepcionista que está realizando a triagem!');
+      return;
+    }
 
-      if (success) {
-        alert(`✅ Ticket #${ticket.getId()} designado para ${specialist.getName()}`);
-        this.cancelarAtendimento();
-        this.updateDisplay();
-      } else {
-        alert('❌ Erro ao designar ticket');
+    if (!specialistSelect.value) {
+      alert('Selecione um especialista antes de finalizar a triagem!');
+      return;
+    }
+
+    const receptionistId = parseInt(receptionistSelect.value);
+    const specialistId = parseInt(specialistSelect.value);
+
+    const receptionist = this.controlCenter.receptionistService.getReceptionistById(receptionistId);
+    const specialist = this.controlCenter.specialistService.getSpecialistById(specialistId);
+
+    if (!receptionist) {
+      alert('Recepcionista selecionado não encontrado!');
+      return;
+    }
+
+    if (!specialist) {
+      alert('Especialista selecionado não encontrado!');
+      return;
+    }
+
+    if (confirm(`Finalizar triagem do Ticket #${ticket.getId()}?\n\nRecepcionista: ${receptionist.getName()}\nEspecialista: ${specialist.getName()}\nEspecialidade: ${this.getSpecialtyLabel(specialist.getSpecialty())}`)) {
+      try {
+        // Designar o especialista ao ticket
+        const success = this.controlCenter.specialistService.assignTicketToSpecialist(
+          ticket.getId(),
+          specialistId
+        );
+
+        if (success) {
+          alert(`✅ Triagem finalizada com sucesso!\n\nTicket #${ticket.getId()}\nRecepcionista: ${receptionist.getName()}\nDesignado para: ${specialist.getName()}`);
+          this.cancelarAtendimento();
+          this.updateDisplay();
+        } else {
+          alert('❌ Erro ao finalizar triagem. O ticket pode já ter sido designado.');
+        }
+      } catch (error) {
+        alert(`❌ Erro ao finalizar triagem: ${error}`);
       }
-    } else {
-      alert('❌ Nenhum especialista disponível');
     }
   }
 
@@ -245,7 +306,12 @@ export class Triagem {
     if (currentTicketElement && atendimentoForm) {
       currentTicketElement.classList.remove('hidden');
       atendimentoForm.classList.add('hidden');
-      atendimentoForm.reset();
+
+      // Resetar os selects
+      const receptionistSelect = document.getElementById('triagemReceptionist') as HTMLSelectElement;
+      const specialistSelect = document.getElementById('triagemSpecialist') as HTMLSelectElement;
+      if (receptionistSelect) receptionistSelect.value = '';
+      if (specialistSelect) specialistSelect.value = '';
     }
 
     // Remover destaque dos tickets
@@ -257,7 +323,7 @@ export class Triagem {
   private getPriorityLabel(priority: Priority): string {
     const labels = {
       'EMERGENCY': '🟥 EMERGÊNCIA',
-      'HIGH': '🟧 ALTA',
+      'HIGH': '🟧 ALTA PRIORIDADE',
       'NORMAL': '🟩 NORMAL'
     };
     return labels[priority];
@@ -279,8 +345,8 @@ export class Triagem {
   }
 
   private startAutoRefresh(): void {
-    setInterval(() => {
+    this.autoRefreshInterval = setInterval(() => {
       this.updateDisplay();
-    }, 10000);
+    }, 10000); // Atualiza a cada 10 segundos
   }
 }

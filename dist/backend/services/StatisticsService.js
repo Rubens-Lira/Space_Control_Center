@@ -1,9 +1,10 @@
 import { Priority } from "../enums/Priority.js";
 export class StatisticsService {
-    constructor(ticketService, receptionistService, specialistService) {
+    constructor(ticketService, receptionistService, specialistService, spaceshipService) {
         this.ticketService = ticketService;
         this.receptionistService = receptionistService;
         this.specialistService = specialistService;
+        this.spaceshipService = spaceshipService;
     }
     // Número total de solicitações
     getTotalRequests() {
@@ -55,7 +56,67 @@ export class StatisticsService {
                 maxSpaceshipId = spaceshipId;
             }
         });
-        return maxSpaceshipId ? { spaceshipId: maxSpaceshipId, count: maxCount } : null;
+        if (maxSpaceshipId) {
+            const spaceship = this.spaceshipService.getSpaceshipById(maxSpaceshipId);
+            return {
+                spaceshipId: maxSpaceshipId,
+                count: maxCount,
+                name: spaceship?.getName()
+            };
+        }
+        return null;
+    }
+    // Estatísticas de naves cadastradas
+    getSpaceshipStats() {
+        const spaceships = this.spaceshipService.getAllSpaceships();
+        const bySector = new Map();
+        spaceships.forEach(spaceship => {
+            const sector = spaceship.getOrbitalSector();
+            const count = bySector.get(sector) || 0;
+            bySector.set(sector, count + 1);
+        });
+        return {
+            total: spaceships.length,
+            bySector: bySector,
+            mostActive: this.getSpaceshipWithMostTickets()
+        };
+    }
+    // Estatísticas de especialistas por especialidade
+    getSpecialistsBySpecialty() {
+        const result = new Map();
+        const specialists = this.specialistService.getAllSpecialists();
+        specialists.forEach(specialist => {
+            const specialty = specialist.getSpecialty();
+            const count = result.get(specialty) || 0;
+            result.set(specialty, count + 1);
+        });
+        return result;
+    }
+    // Tempo médio de atendimento (em minutos)
+    getAverageProcessingTime() {
+        const allTickets = this.ticketService.getAllTickets();
+        const completedTickets = allTickets.filter(ticket => ticket.isCompleted());
+        if (completedTickets.length === 0)
+            return 0;
+        const totalTime = completedTickets.reduce((sum, ticket) => {
+            const processingTime = ticket.getProcessingTime();
+            return sum + (processingTime || 0);
+        }, 0);
+        return Math.round(totalTime / completedTickets.length);
+    }
+    // Taxa de conclusão por prioridade
+    getCompletionRateByPriority() {
+        const result = new Map();
+        const allTickets = this.ticketService.getAllTickets();
+        Object.values(Priority).forEach(priority => {
+            const priorityTickets = allTickets.filter(ticket => ticket.getPriority() === priority);
+            const completedTickets = priorityTickets.filter(ticket => ticket.isCompleted());
+            const completionRate = priorityTickets.length > 0
+                ? (completedTickets.length / priorityTickets.length) * 100
+                : 0;
+            result.set(priority, Math.round(completionRate));
+        });
+        return result;
     }
     // Estatísticas gerais do dia
     getDailyStats() {
@@ -69,7 +130,31 @@ export class StatisticsService {
             totalToday: todayTickets.length,
             completedToday: todayTickets.filter(t => t.isCompleted()).length,
             queueStats: this.ticketService.getQueueStats(),
-            priorityBreakdown: this.getTicketsByPriority()
+            priorityBreakdown: this.getTicketsByPriority(),
+            spaceshipStats: this.getSpaceshipStats(),
+            averageProcessingTime: this.getAverageProcessingTime()
+        };
+    }
+    // Dashboard completo
+    getDashboardData() {
+        return {
+            general: {
+                totalTickets: this.getTotalRequests(),
+                totalSpaceships: this.spaceshipService.getSpaceshipsCount(),
+                totalReceptionists: this.receptionistService.getAllReceptionists().length,
+                totalSpecialists: this.specialistService.getAllSpecialists().length
+            },
+            tickets: {
+                byPriority: this.getTicketsByPriority(),
+                completionRate: this.getCompletionRateByPriority(),
+                averageTime: this.getAverageProcessingTime()
+            },
+            spaceships: this.getSpaceshipStats(),
+            specialists: {
+                bySpecialty: this.getSpecialistsBySpecialty(),
+                performance: this.getCompletedTicketsBySpecialist()
+            },
+            daily: this.getDailyStats()
         };
     }
 }

@@ -1,14 +1,21 @@
 export class Triagem {
     constructor(controlCenter) {
         this.currentTicket = null;
+        this.autoRefreshInterval = null;
         this.controlCenter = controlCenter;
     }
     initialize() {
         this.setupNavigation();
         this.setupTabs();
         this.loadReceptionists();
+        this.loadSpecialists();
         this.updateDisplay();
         this.startAutoRefresh();
+    }
+    cleanup() {
+        if (this.autoRefreshInterval) {
+            clearInterval(this.autoRefreshInterval);
+        }
     }
     setupNavigation() {
         const navButtons = document.querySelectorAll('.nav-btn');
@@ -16,20 +23,15 @@ export class Triagem {
             button.addEventListener('click', (e) => {
                 const target = e.target;
                 const module = target.dataset.module;
-                // Remover classe active de todos os botões
                 navButtons.forEach(btn => btn.classList.remove('active'));
-                // Adicionar classe active ao botão clicado
                 target.classList.add('active');
-                // Mostrar módulo correspondente
                 this.showModule(module);
             });
         });
     }
     showModule(moduleName) {
-        // Esconder todos os módulos
         const modules = document.querySelectorAll('.module-content');
         modules.forEach(module => module.classList.remove('active'));
-        // Mostrar módulo selecionado
         const targetModule = document.getElementById(moduleName);
         targetModule?.classList.add('active');
     }
@@ -39,26 +41,54 @@ export class Triagem {
             button.addEventListener('click', (e) => {
                 const target = e.target;
                 const priority = target.dataset.priority;
-                // Atualizar tabs
                 tabButtons.forEach(btn => btn.classList.remove('active'));
                 target.classList.add('active');
-                // Atualizar lista de tickets
                 this.updateTicketsList(priority);
             });
         });
     }
     loadReceptionists() {
-        const select = document.getElementById('triagemReceptionist');
-        if (!select)
+        const receptionistSelect = document.getElementById('triagemReceptionist');
+        if (!receptionistSelect)
             return;
-        select.innerHTML = '';
         const receptionists = this.controlCenter.receptionistService.getAllReceptionists();
+        receptionistSelect.innerHTML = '<option value="">Selecione o recepcionista</option>';
+        if (receptionists.length === 0) {
+            receptionistSelect.innerHTML = '<option value="">Nenhum recepcionista disponível</option>';
+            return;
+        }
         receptionists.forEach(receptionist => {
             const option = document.createElement('option');
             option.value = receptionist.getId().toString();
-            option.textContent = receptionist.getName();
-            select.appendChild(option);
+            option.textContent = `👨‍💼 ${receptionist.getName()}`;
+            receptionistSelect.appendChild(option);
         });
+    }
+    loadSpecialists() {
+        const specialistSelect = document.getElementById('triagemSpecialist');
+        if (!specialistSelect)
+            return;
+        const specialists = this.controlCenter.specialistService.getAllSpecialists();
+        specialistSelect.innerHTML = '<option value="">Selecione um especialista</option>';
+        if (specialists.length === 0) {
+            specialistSelect.innerHTML = '<option value="">Nenhum especialista disponível</option>';
+            return;
+        }
+        specialists.forEach(specialist => {
+            const option = document.createElement('option');
+            option.value = specialist.getId().toString();
+            option.textContent = `👩‍🔬 ${specialist.getName()} - ${this.getSpecialtyLabel(specialist.getSpecialty())}`;
+            specialistSelect.appendChild(option);
+        });
+    }
+    getSpecialtyLabel(specialty) {
+        const specialties = {
+            'COMMUNICATIONS': 'Comunicações',
+            'POWER': 'Sistemas de Energia',
+            'NAVIGATION': 'Navegação',
+            'LIFE_SUPPORT': 'Suporte de Vida'
+        };
+        return specialties[specialty] || specialty;
     }
     updateDisplay() {
         this.updateStats();
@@ -105,6 +135,7 @@ export class Triagem {
         ticketDiv.setAttribute('data-ticket-id', ticket.getId().toString());
         const priorityLabel = this.getPriorityLabel(ticket.getPriority());
         const timeAgo = this.getTimeAgo(ticket.getCreatedAt());
+        const spaceship = this.controlCenter.spaceshipService.getSpaceshipById(ticket.getSpaceshipId());
         ticketDiv.innerHTML = `
       <div class="ticket-header">
         <span class="ticket-id">Ticket #${ticket.getId()}</span>
@@ -112,7 +143,7 @@ export class Triagem {
       </div>
       <div class="ticket-description">${ticket.getDescription()}</div>
       <div class="ticket-meta">
-        <span>Nave ID: ${ticket.getSpaceshipId()}</span>
+        <span>🚀 ${spaceship?.getName() || 'Nave não encontrada'}</span>
         <span>${timeAgo}</span>
       </div>
       ${ticket.getHumansInvolved() ? '<div class="ticket-humans">🧑‍🚀 Humanos envolvidos</div>' : ''}
@@ -125,7 +156,6 @@ export class Triagem {
     selectTicket(ticket) {
         this.currentTicket = ticket;
         this.showTicketDetails(ticket);
-        // Destacar ticket selecionado
         document.querySelectorAll('.ticket-item').forEach(item => {
             item.classList.remove('selected');
         });
@@ -136,25 +166,24 @@ export class Triagem {
         const atendimentoForm = document.getElementById('atendimentoForm');
         if (!currentTicketElement || !atendimentoForm)
             return;
-        // Mostrar formulário e esconder "nenhum ticket"
         currentTicketElement.classList.add('hidden');
         atendimentoForm.classList.remove('hidden');
+        const spaceship = this.controlCenter.spaceshipService.getSpaceshipById(ticket.getSpaceshipId());
         // Preencher dados do ticket no formulário
-        document.getElementById('triagemSpaceshipName').value = `Nave ${ticket.getSpaceshipId()}`;
-        document.getElementById('triagemMissionCode').value = `MISS-${ticket.getSpaceshipId()}`;
-        document.getElementById('triagemOrbitalSector').value = 'Setor Alpha';
+        document.getElementById('triagemSpaceshipName').value = spaceship?.getName() || 'Nave não encontrada';
+        document.getElementById('triagemMissionCode').value = spaceship?.getMissionCode() || 'N/A';
+        document.getElementById('triagemOrbitalSector').value = spaceship?.getOrbitalSector() || 'N/A';
+        document.getElementById('triagemPriority').value = this.getPriorityLabel(ticket.getPriority());
         document.getElementById('triagemDescription').value = ticket.getDescription();
         document.getElementById('triagemHumansInvolved').checked = ticket.getHumansInvolved();
-        // Configurar submit do formulário
-        atendimentoForm.onsubmit = (e) => {
-            e.preventDefault();
-            this.finalizarTriagem(ticket);
-        };
-        // Configurar botão de designar
-        const assignButton = document.querySelector('.btn-assign');
-        if (assignButton) {
-            assignButton.onclick = () => {
-                this.designarParaEspecialista(ticket);
+        // Recarregar selects
+        this.loadReceptionists();
+        this.loadSpecialists();
+        // Configurar botão de finalizar
+        const completeButton = document.querySelector('.btn-complete');
+        if (completeButton) {
+            completeButton.onclick = () => {
+                this.finalizarTriagem(ticket);
             };
         }
         // Configurar botão de cancelar
@@ -166,26 +195,45 @@ export class Triagem {
         }
     }
     finalizarTriagem(ticket) {
-        alert(`✅ Triagem finalizada para Ticket #${ticket.getId()}`);
-        this.cancelarAtendimento();
-        this.updateDisplay();
-    }
-    designarParaEspecialista(ticket) {
-        const specialists = this.controlCenter.specialistService.getAllSpecialists();
-        if (specialists.length > 0) {
-            const specialist = specialists[0];
-            const success = this.controlCenter.specialistService.assignTicketToSpecialist(ticket.getId(), specialist.getId());
-            if (success) {
-                alert(`✅ Ticket #${ticket.getId()} designado para ${specialist.getName()}`);
-                this.cancelarAtendimento();
-                this.updateDisplay();
-            }
-            else {
-                alert('❌ Erro ao designar ticket');
-            }
+        const receptionistSelect = document.getElementById('triagemReceptionist');
+        const specialistSelect = document.getElementById('triagemSpecialist');
+        // Validações
+        if (!receptionistSelect.value) {
+            alert('Selecione o recepcionista que está realizando a triagem!');
+            return;
         }
-        else {
-            alert('❌ Nenhum especialista disponível');
+        if (!specialistSelect.value) {
+            alert('Selecione um especialista antes de finalizar a triagem!');
+            return;
+        }
+        const receptionistId = parseInt(receptionistSelect.value);
+        const specialistId = parseInt(specialistSelect.value);
+        const receptionist = this.controlCenter.receptionistService.getReceptionistById(receptionistId);
+        const specialist = this.controlCenter.specialistService.getSpecialistById(specialistId);
+        if (!receptionist) {
+            alert('Recepcionista selecionado não encontrado!');
+            return;
+        }
+        if (!specialist) {
+            alert('Especialista selecionado não encontrado!');
+            return;
+        }
+        if (confirm(`Finalizar triagem do Ticket #${ticket.getId()}?\n\nRecepcionista: ${receptionist.getName()}\nEspecialista: ${specialist.getName()}\nEspecialidade: ${this.getSpecialtyLabel(specialist.getSpecialty())}`)) {
+            try {
+                // Designar o especialista ao ticket
+                const success = this.controlCenter.specialistService.assignTicketToSpecialist(ticket.getId(), specialistId);
+                if (success) {
+                    alert(`✅ Triagem finalizada com sucesso!\n\nTicket #${ticket.getId()}\nRecepcionista: ${receptionist.getName()}\nDesignado para: ${specialist.getName()}`);
+                    this.cancelarAtendimento();
+                    this.updateDisplay();
+                }
+                else {
+                    alert('❌ Erro ao finalizar triagem. O ticket pode já ter sido designado.');
+                }
+            }
+            catch (error) {
+                alert(`❌ Erro ao finalizar triagem: ${error}`);
+            }
         }
     }
     cancelarAtendimento() {
@@ -195,7 +243,13 @@ export class Triagem {
         if (currentTicketElement && atendimentoForm) {
             currentTicketElement.classList.remove('hidden');
             atendimentoForm.classList.add('hidden');
-            atendimentoForm.reset();
+            // Resetar os selects
+            const receptionistSelect = document.getElementById('triagemReceptionist');
+            const specialistSelect = document.getElementById('triagemSpecialist');
+            if (receptionistSelect)
+                receptionistSelect.value = '';
+            if (specialistSelect)
+                specialistSelect.value = '';
         }
         // Remover destaque dos tickets
         document.querySelectorAll('.ticket-item').forEach(item => {
@@ -205,7 +259,7 @@ export class Triagem {
     getPriorityLabel(priority) {
         const labels = {
             'EMERGENCY': '🟥 EMERGÊNCIA',
-            'HIGH': '🟧 ALTA',
+            'HIGH': '🟧 ALTA PRIORIDADE',
             'NORMAL': '🟩 NORMAL'
         };
         return labels[priority];
@@ -225,8 +279,8 @@ export class Triagem {
         return `${diffDays} dias atrás`;
     }
     startAutoRefresh() {
-        setInterval(() => {
+        this.autoRefreshInterval = setInterval(() => {
             this.updateDisplay();
-        }, 10000);
+        }, 10000); // Atualiza a cada 10 segundos
     }
 }

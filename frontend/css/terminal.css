@@ -147,3 +147,26 @@
     margin-bottom: 15px;
     color: #00ffff;
 }
+
+/* Estilo para o select de naves */
+#spaceshipSelect {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+#spaceshipSelect:focus {
+    outline: none;
+    border-color: #00d4ff;
+    box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.3);
+}
+
+#spaceshipSelect option {
+    padding: 0.5rem;
+    background: white;
+    color: #333;
+}

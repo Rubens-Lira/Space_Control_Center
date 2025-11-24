@@ -12,7 +12,7 @@
   },
   "include": [
     "backend/**/*",
-    "frontend/js/**/*"
+    "frontend/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }

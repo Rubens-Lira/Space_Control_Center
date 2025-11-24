@@ -58,6 +58,12 @@ export class Ticket {
         const year = this.createdAt.getFullYear();
         return `${day}/${month}/${year}`;
     }
+    getProcessingTime() {
+        if (!this.completedAt)
+            return null;
+        const processingTime = this.completedAt.getTime() - this.createdAt.getTime();
+        return Math.round(processingTime / 60000); // Converter para minutos
+    }
     getId() { return this.id; }
     getReceptionistId() { return this.receptionistId; }
     getSpaceshipId() { return this.spaceshipId; }

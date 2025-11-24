@@ -8,6 +8,7 @@ export class Terminal {
         this.setupFormSubmission();
         this.setupCancelButton();
         this.updateQueueStatus();
+        this.loadSpaceships();
     }
     setupPriorityButtons() {
         const buttons = document.querySelectorAll('.priority-buttons button');
@@ -24,6 +25,7 @@ export class Terminal {
         const priorityButtons = document.querySelector('.priority-buttons');
         form?.classList.remove('hidden');
         priorityButtons?.classList.add('hidden');
+        this.loadSpaceships();
     }
     hideRequestForm() {
         const form = document.getElementById('requestForm');
@@ -48,24 +50,31 @@ export class Terminal {
     processSupportRequest() {
         if (!this.currentPriority)
             return;
-        const spaceshipName = document.getElementById('spaceshipName').value;
-        const missionCode = document.getElementById('missionCode').value;
-        const orbitalSector = document.getElementById('orbitalSector').value;
+        const spaceshipSelect = document.getElementById('spaceshipSelect');
         const problemDescription = document.getElementById('problemDescription').value;
         const humansInvolved = document.getElementById('humansInvolved').checked;
-        if (!spaceshipName.trim() || !missionCode.trim() || !orbitalSector.trim() || !problemDescription.trim()) {
-            this.showErrorMessage('Por favor, preencha todos os campos obrigatórios');
+        // Validações
+        if (!spaceshipSelect.value) {
+            alert('Selecione uma nave!');
+            return;
+        }
+        if (!problemDescription.trim()) {
+            alert('Descreva o problema!');
+            return;
+        }
+        const spaceshipId = parseInt(spaceshipSelect.value);
+        const selectedSpaceship = this.controlCenter.spaceshipService.getSpaceshipById(spaceshipId);
+        if (!selectedSpaceship) {
+            alert('Nave selecionada não encontrada!');
             return;
         }
         // Usar o primeiro recepcionista disponível
         const receptionists = this.controlCenter.receptionistService.getAllReceptionists();
         const receptionistId = receptionists.length > 0 ? receptionists[0].getId() : 1;
-        // Gerar ID único para a nave
-        const spaceshipId = Date.now();
         try {
-            const ticket = this.controlCenter.receptionistService.processNewRequest(receptionistId, spaceshipId, `[${orbitalSector}] ${spaceshipName} - ${missionCode}: ${problemDescription}`, humansInvolved, this.currentPriority);
+            const ticket = this.controlCenter.receptionistService.processNewRequest(receptionistId, spaceshipId, `[${selectedSpaceship.getOrbitalSector()}] ${selectedSpaceship.getName()} - ${selectedSpaceship.getMissionCode()}: ${problemDescription}`, humansInvolved, this.currentPriority);
             if (ticket) {
-                this.showSuccessMessage(ticket);
+                this.showSuccessMessage(ticket, selectedSpaceship.getName());
                 this.hideRequestForm();
                 this.updateQueueStatus();
             }
@@ -74,8 +83,8 @@ export class Terminal {
             this.showErrorMessage('Erro ao processar solicitação: ' + error);
         }
     }
-    showSuccessMessage(ticket) {
-        alert(`✅ Solicitação criada com sucesso!\nTicket #${ticket.getId()}\nPrioridade: ${ticket.getPriority()}`);
+    showSuccessMessage(ticket, spaceshipName) {
+        alert(`✅ Solicitação criada com sucesso!\nTicket #${ticket.getId()}\nNave: ${spaceshipName}\nPrioridade: ${ticket.getPriority()}`);
     }
     showErrorMessage(message) {
         alert(`❌ ${message}`);
@@ -91,5 +100,28 @@ export class Terminal {
             const stats = this.controlCenter.ticketService.getQueueStats();
             queueCountElement.textContent = `Fila: ${stats.total} tickets (${stats.emergency} 🟥 ${stats.highPriority} 🟧 ${stats.normal} 🟩)`;
         }
+    }
+    loadSpaceships() {
+        const spaceshipSelect = document.getElementById('spaceshipSelect');
+        if (!spaceshipSelect)
+            return;
+        const naves = this.controlCenter.spaceshipService.getAllSpaceships();
+        spaceshipSelect.innerHTML = '';
+        if (naves.length === 0) {
+            spaceshipSelect.innerHTML = '<option value="">Nenhuma nave cadastrada</option>';
+            return;
+        }
+        // Adicionar opção padrão
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Selecione uma nave';
+        spaceshipSelect.appendChild(defaultOption);
+        // Adicionar naves
+        naves.forEach(nave => {
+            const option = document.createElement('option');
+            option.value = nave.getId().toString();
+            option.textContent = `🚀 ${nave.getName()} - ${nave.getMissionCode()} (${nave.getOrbitalSector()})`;
+            spaceshipSelect.appendChild(option);
+        });
     }
 }

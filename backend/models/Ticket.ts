@@ -71,7 +71,13 @@ export class Ticket {
 
     return `${day}/${month}/${year}`;
   }
-  
+
+  public getProcessingTime(): number | null {
+    if (!this.completedAt) return null;
+    const processingTime = this.completedAt.getTime() - this.createdAt.getTime();
+    return Math.round(processingTime / 60000); // Converter para minutos
+  }
+
   public getId(): number { return this.id; }
   public getReceptionistId(): number { return this.receptionistId; }
   public getSpaceshipId(): number { return this.spaceshipId; }

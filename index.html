@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="./frontend/css/terminal.css">
   <link rel="stylesheet" href="./frontend/css/triagem.css">
   <link rel="stylesheet" href="./frontend/css/d3-charts.css">
+  <link rel="stylesheet" href="./frontend/css/especialista.css">
 </head>
 
 <body>
@@ -27,6 +28,7 @@
       <button class="nav-btn active" data-module="terminal">🚀 Terminal</button>
       <button class="nav-btn" data-module="triagem">👨‍💼 Triagem</button>
       <button class="nav-btn" data-module="especialista">🔧 Especialistas</button>
+      <button class="nav-btn" data-module="cadastros">📋 Cadastros</button>
     </nav>
 
     <!-- Conteúdo dos Módulos -->
@@ -61,20 +63,14 @@
             <h3>📝 Dados da Solicitação</h3>
             <form id="supportForm">
               <div class="form-group">
-                <label for="spaceshipName">Nome da Nave:</label>
-                <input type="text" id="spaceshipName" required>
-              </div>
-              <div class="form-group">
-                <label for="missionCode">Código da Missão:</label>
-                <input type="text" id="missionCode" required>
-              </div>
-              <div class="form-group">
-                <label for="orbitalSector">Setor Orbital:</label>
-                <input type="text" id="orbitalSector" required>
+                <label for="spaceshipSelect">Selecionar Nave:</label>
+                <select id="spaceshipSelect" required>
+                  <option value="">Carregando naves...</option>
+                </select>
               </div>
               <div class="form-group">
                 <label for="problemDescription">Descrição do Problema:</label>
-                <textarea id="problemDescription" required></textarea>
+                <textarea id="problemDescription" placeholder="Descreva o problema encontrado..." required></textarea>
               </div>
               <div class="form-group">
                 <label class="checkbox-label">
@@ -89,7 +85,7 @@
             </form>
           </div>
 
-          <!-- Mini Dashboard D3 -->
+          <!-- Mini Dashboard -->
           <div class="mini-dashboard">
             <h4>📊 Estatísticas em Tempo Real</h4>
             <div id="priorityChart" class="chart-container"></div>
@@ -108,6 +104,7 @@
         </div>
 
         <div class="triagem-container">
+
           <!-- Painel de Tickets Pendentes -->
           <div class="tickets-panel">
             <h3>📋 Tickets para Triagem</h3>
@@ -118,7 +115,7 @@
               <button class="tab-btn" data-priority="NORMAL">🟩 Normal</button>
             </div>
             <div class="tickets-list" id="ticketsList">
-              <!-- Tickets serão inseridos aqui via JavaScript -->
+              <p class="no-tickets">Nenhum ticket na fila</p>
             </div>
           </div>
 
@@ -130,47 +127,60 @@
             </div>
 
             <form class="atendimento-form hidden" id="atendimentoForm">
-              <h4>Registrar Dados da Nave</h4>
+              <h4>Designar para Especialista</h4>
 
               <div class="form-row">
                 <div class="form-group">
                   <label for="triagemSpaceshipName">Nome da Nave:</label>
-                  <input type="text" id="triagemSpaceshipName" required>
+                  <input type="text" id="triagemSpaceshipName" readonly>
                 </div>
                 <div class="form-group">
                   <label for="triagemMissionCode">Código da Missão:</label>
-                  <input type="text" id="triagemMissionCode" required>
+                  <input type="text" id="triagemMissionCode" readonly>
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label for="triagemOrbitalSector">Setor Orbital:</label>
-                  <input type="text" id="triagemOrbitalSector" required>
+                  <input type="text" id="triagemOrbitalSector" readonly>
                 </div>
                 <div class="form-group">
-                  <label for="triagemReceptionist">Operador:</label>
-                  <select id="triagemReceptionist" required>
-                    <!-- Preenchido via JavaScript -->
-                  </select>
+                  <label for="triagemPriority">Prioridade:</label>
+                  <input type="text" id="triagemPriority" readonly>
                 </div>
               </div>
 
               <div class="form-group">
                 <label for="triagemDescription">Descrição da Ocorrência:</label>
-                <textarea id="triagemDescription" required></textarea>
+                <textarea id="triagemDescription" readonly></textarea>
+              </div>
+
+              <!-- Select do Recepcionista -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="triagemReceptionist">Recepcionista da Triagem:</label>
+                  <select id="triagemReceptionist" required>
+                    <option value="">Selecione o recepcionista</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="triagemSpecialist">Designar para Especialista:</label>
+                  <select id="triagemSpecialist" required>
+                    <option value="">Selecione um especialista</option>
+                  </select>
+                </div>
               </div>
 
               <div class="form-group">
                 <label class="checkbox-label">
-                  <input type="checkbox" id="triagemHumansInvolved">
+                  <input type="checkbox" id="triagemHumansInvolved" disabled>
                   🧑‍🚀 Há tripulação humana envolvida
                 </label>
               </div>
 
               <div class="form-actions">
-                <button type="submit" class="btn-complete">✅ Finalizar Triagem</button>
-                <button type="button" class="btn-assign">🔧 Designar para Especialista</button>
+                <button type="button" class="btn-complete">✅ Finalizar Triagem</button>
                 <button type="button" class="btn-cancel">❌ Cancelar</button>
               </div>
             </form>
@@ -184,17 +194,206 @@
             <div id="triagemPriorityChart" class="chart-container"></div>
           </div>
           <div class="chart-card">
-            <h4>⏱️ Tempo de Espera</h4>
-            <div id="triagemTimeChart" class="chart-container"></div>
+            <h4>👨‍🔬 Especialistas Disponíveis</h4>
+            <div id="triagemSpecialistsChart" class="chart-container"></div>
           </div>
         </div>
       </section>
 
-      <!-- Painel de Especialistas (a implementar) -->
       <section id="especialista" class="module-content">
-        <div class="coming-soon">
+        <div class="especialista-header">
           <h2>🔧 Painel de Atendimento Especializado</h2>
-          <p>Em desenvolvimento...</p>
+          <div class="especialista-stats">
+            <span id="especialistaAtivos">Especialistas: 0</span>
+            <span id="especialistaOcupados">Ocupados: 0</span>
+            <span id="especialistaFila">Fila: 0 tickets</span>
+          </div>
+        </div>
+
+        <!-- Seletor de Especialista -->
+        <div class="especialista-selector">
+          <div class="form-group">
+            <label for="selectEspecialista">Selecionar Especialista:</label>
+            <div class="especialista-select-wrapper">
+              <select id="selectEspecialista" class="especialista-select">
+                <option value="">Selecione um especialista...</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="especialista-container">
+          <!-- Painel de Tickets do Especialista Selecionado -->
+          <div class="tickets-especialista-panel">
+            <h3>📋 Tickets Designados</h3>
+            <div class="tickets-status">
+              <span id="ticketsPendentes">Pendentes: 0</span>
+              <span id="ticketsConcluidos">Concluídos: 0</span>
+            </div>
+            <div class="tickets-list-especialista" id="ticketsListEspecialista">
+              <p class="no-tickets">Selecione um especialista para ver os tickets</p>
+            </div>
+          </div>
+
+          <!-- Painel de Atendimento -->
+          <div class="atendimento-especialista-panel">
+            <h3>🎯 Atendimento em Andamento</h3>
+            <div class="current-atendimento" id="currentAtendimento">
+              <p class="no-ticket">Nenhum ticket selecionado</p>
+            </div>
+
+            <form class="atendimento-especialista-form hidden" id="atendimentoEspecialistaForm">
+              <h4>Detalhes do Atendimento</h4>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="especialistaNave">Nome da Nave:</label>
+                  <input type="text" id="especialistaNave" readonly>
+                </div>
+                <div class="form-group">
+                  <label for="especialistaTicket">Ticket #:</label>
+                  <input type="text" id="especialistaTicket" readonly>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="especialistaPrioridade">Prioridade:</label>
+                  <input type="text" id="especialistaPrioridade" readonly>
+                </div>
+                <div class="form-group">
+                  <label for="especialistaSetor">Setor Orbital:</label>
+                  <input type="text" id="especialistaSetor" readonly>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="especialistaDescricao">Descrição do Problema:</label>
+                <textarea id="especialistaDescricao" readonly></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="especialistaSolucao">Solução Aplicada:</label>
+                <textarea id="especialistaSolucao" placeholder="Descreva a solução aplicada..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="especialistaTripulacao" disabled>
+                  🧑‍🚀 Tripulação humana envolvida
+                </label>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn-finalizar" id="btnFinalizarAtendimento">✅ Finalizar
+                  Atendimento</button>
+                <button type="button" class="btn-cancel">❌ Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Histórico de Atendimentos -->
+        <div class="historico-atendimentos">
+          <h3>📋 Histórico de Atendimentos</h3>
+          <div class="historico-list" id="historicoList">
+            <p class="no-tickets">Nenhum atendimento finalizado</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Painel de Cadastros -->
+      <section id="cadastros" class="module-content">
+        <div class="cadastros">
+          <h2>📋 Cadastros</h2>
+
+          <div class="cadastro-tabs">
+            <button class="cadastro-tab active" data-tab="naves">🚀 Naves</button>
+            <button class="cadastro-tab" data-tab="receptionists">👨‍💼 Recepcionistas</button>
+            <button class="cadastro-tab" data-tab="specialists">👩‍🔬 Especialistas</button>
+          </div>
+
+          <!-- Tab Naves -->
+          <div id="navesTab" class="tab-content active">
+            <div class="form-container">
+              <h3>Cadastrar Nova Nave</h3>
+              <form id="naveForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <input type="text" id="naveNome" placeholder="Nome da Nave" required>
+                  </div>
+                  <div class="form-group">
+                    <input type="text" id="naveMissao" placeholder="Código da Missão" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <input type="text" id="naveOrbitalSector" placeholder="Setor da Nave" required>
+                </div>
+                <div class="form-actions-cadastro">
+                  <button type="submit" class="btn-cadastrar">🚀 Cadastrar Nave</button>
+                </div>
+              </form>
+            </div>
+            <div class="list-container">
+              <h3>Naves Cadastradas</h3>
+              <div id="navesList" class="items-list">
+                <p class="no-data">Nenhuma nave cadastrada</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Recepcionistas -->
+          <div id="receptionistsTab" class="tab-content">
+            <div class="form-container">
+              <h3>Cadastrar Recepcionista</h3>
+              <form id="receptionistForm">
+                <div class="form-group">
+                  <input type="text" id="receptionistNome" placeholder="Nome do Recepcionista" required>
+                </div>
+                <div class="form-actions-cadastro">
+                  <button type="submit" class="btn-cadastrar">👨‍💼 Cadastrar Recepcionista</button>
+                </div>
+              </form>
+            </div>
+            <div class="list-container">
+              <h3>Recepcionistas Cadastrados</h3>
+              <div id="receptionistsList" class="items-list">
+                <p class="no-data">Nenhum recepcionista cadastrado</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Especialistas -->
+          <div id="specialistsTab" class="tab-content">
+            <div class="form-container">
+              <h3>Cadastrar Especialista</h3>
+              <form id="specialistForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <input type="text" id="specialistNome" placeholder="Nome do Especialista" required>
+                  </div>
+                  <div class="form-group">
+                    <select id="specialistEspecialidade" required>
+                      <option value="">Selecione a especialidade</option>
+                      <option value="COMMUNICATIONS">Comunicações</option>
+                      <option value="POWER">Sistemas de Energia</option>
+                      <option value="NAVIGATION">Navegação</option>
+                      <option value="LIFE_SUPPORT">Suporte de Vida</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-actions-cadastro">
+                  <button type="submit" class="btn-cadastrar">👩‍🔬 Cadastrar Especialista</button>
+                </div>
+              </form>
+            </div>
+            <div class="list-container">
+              <h3>Especialistas Cadastrados</h3>
+              <div id="specialistsList" class="items-list">
+                <p class="no-data">Nenhum especialista cadastrado</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
