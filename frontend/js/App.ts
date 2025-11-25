@@ -4,6 +4,7 @@ import { PriorityChart } from './PriorityChart.js';
 import { Registrations } from './Registrations.js';
 import { SpaceControlCenter } from '../../backend/SpaceControlCenter.js';
 import { Especialista } from './Especialista.js';
+import { StatisticsPanel } from './StatisticsPainel.js';
 
 class SpaceControlApp {
   private controlCenter: SpaceControlCenter;
@@ -12,6 +13,7 @@ class SpaceControlApp {
   private priorityChart: PriorityChart;
   private registrations: Registrations;
   private especialista: Especialista;
+  private statisticsPanel: StatisticsPanel;
 
   constructor() {
     this.controlCenter = new SpaceControlCenter();
@@ -20,6 +22,7 @@ class SpaceControlApp {
     this.priorityChart = new PriorityChart(this.controlCenter);
     this.registrations = new Registrations(this.controlCenter);
     this.especialista = new Especialista(this.controlCenter);
+    this.statisticsPanel = new StatisticsPanel(this.controlCenter);
 
     this.initializeApp();
   }
@@ -27,24 +30,24 @@ class SpaceControlApp {
   private initializeApp(): void {
     console.log('🚀 Centro de Controle Espacial Iniciado');
 
-    // Inicializar componentes (cada um gerencia seu próprio refresh)
+    // Inicializar componentes
     this.terminal.initialize();
     this.triagem.initialize();
     this.priorityChart.initialize();
     this.registrations.initialize();
     this.especialista.initialize();
+    this.statisticsPanel.initialize();
 
-    // Apenas componentes que precisam de coordenação central
+    // Iniciar atualizações em tempo real
     this.startRealTimeUpdates();
   }
 
   private startRealTimeUpdates(): void {
     setInterval(() => {
-      // Apenas componentes que precisam de sincronização central
       this.priorityChart.update();
       this.terminal.updateQueueStatus();
-      // Triagem e Especialista se auto-gerenciam internamente
-    }, 5000);
+      this.statisticsPanel.refresh();
+    }, 10000); // Atualizar a cada 10 segundos
   }
 }
 

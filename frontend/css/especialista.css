@@ -698,3 +698,355 @@
         gap: 10px;
     }
 }
+
+/* ========== ESTILOS DAS ESTATÍSTICAS ========== */
+
+.estatisticas-panel {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 30px 0;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.estatisticas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.estatisticas-header h3 {
+    background: linear-gradient(45deg, #4caf50, #66bb6a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.6em;
+    margin: 0;
+    font-weight: 700;
+}
+
+.estatisticas-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-refresh,
+.btn-export {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.1em;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-refresh:hover {
+    background: rgba(255, 167, 38, 0.3);
+    border-color: #ffa726;
+    transform: scale(1.1);
+}
+
+.btn-export:hover {
+    background: rgba(76, 175, 80, 0.3);
+    border-color: #4caf50;
+    transform: scale(1.1);
+}
+
+.btn-refresh.refreshing {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.estatisticas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.stats-card {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 20px;
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+.stats-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.stats-card h4 {
+    color: #ffa726;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.stats-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    font-weight: 500;
+    opacity: 0.9;
+    font-size: 0.9em;
+}
+
+.stat-value {
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.95em;
+    min-width: 50px;
+    text-align: center;
+}
+
+.stat-value.emergency {
+    background: rgba(220, 38, 38, 0.3);
+    color: #dc2626;
+}
+
+/* Cores específicas para cada card */
+.general-stats {
+    border-left-color: #4caf50;
+}
+
+.today-stats {
+    border-left-color: #2196f3;
+}
+
+.queue-stats {
+    border-left-color: #9c27b0;
+}
+
+.priority-stats {
+    border-left-color: #ff9800;
+}
+
+.top-spaceships {
+    border-left-color: #00bcd4;
+}
+
+.top-specialists {
+    border-left-color: #e91e63;
+}
+
+/* Estilos para prioridades */
+.priority-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.priority-item:hover {
+    transform: translateX(5px);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.priority-item.emergency {
+    background: rgba(220, 38, 38, 0.15);
+}
+
+.priority-item.high {
+    background: rgba(245, 158, 11, 0.15);
+}
+
+.priority-item.normal {
+    background: rgba(16, 185, 129, 0.15);
+}
+
+.priority-icon {
+    font-size: 1.2em;
+}
+
+.priority-label {
+    flex: 1;
+    font-weight: 500;
+    font-size: 0.9em;
+}
+
+.priority-count {
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Top items */
+.top-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.top-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.top-item.top-1 {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 167, 38, 0.2));
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.top-rank {
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.2);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+}
+
+.top-name {
+    flex: 1;
+    font-weight: 500;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.top-count {
+    font-weight: bold;
+    background: rgba(255, 167, 38, 0.3);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8em;
+}
+
+/* Estados de loading e vazio */
+.loading,
+.no-data {
+    text-align: center;
+    opacity: 0.6;
+    font-style: italic;
+    padding: 20px;
+}
+
+.loading {
+    color: #ffa726;
+}
+
+.no-data {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .estatisticas-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .estatisticas-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .estatisticas-actions {
+        justify-content: center;
+    }
+
+    .stats-card {
+        padding: 15px;
+    }
+
+    .stat-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .stat-value {
+        align-self: flex-end;
+    }
+
+    .priority-item,
+    .top-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .priority-count,
+    .top-count {
+        align-self: flex-end;
+    }
+}
+
+/* Estilo para o card de recepcionistas */
+.top-receptionists {
+    border-left-color: #ff9800;
+}
+
+/* Garantir que o grid se ajuste ao novo card */
+.estatisticas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}

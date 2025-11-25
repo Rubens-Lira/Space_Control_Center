@@ -3,6 +3,7 @@ import { ReceptionistService } from "./ReceptionistService.js";
 import { SpecialistService } from "./SpecialistService.js";
 import { SpaceshipService } from "./SpaceshipService.js";
 import { Priority } from "../enums/Priority.js";
+import { Ticket } from "../models/Ticket.js";
 
 export class StatisticsService {
   constructor(
@@ -12,59 +13,113 @@ export class StatisticsService {
     private spaceshipService: SpaceshipService
   ) { }
 
-  // Número total de solicitações
-  public getTotalRequests(): number {
+  // ========== ESTATÍSTICAS PRINCIPAIS ==========
+
+  // 1. Número total de solicitações por dia
+  public getDailyRequests(): { date: string, count: number }[] {
     const allTickets = this.ticketService.getAllTickets();
-    return allTickets.length;
+    const dailyCount = new Map<string, number>();
+
+    allTickets.forEach(ticket => {
+      const dateKey = ticket.getCreatedAt().toISOString().split('T')[0];
+      const count = dailyCount.get(dateKey) || 0;
+      dailyCount.set(dateKey, count + 1);
+    });
+
+    return Array.from(dailyCount.entries())
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 7);
   }
 
-  // Quantidade de atendimentos por tipo de prioridade
+  // 2. Quantidade de atendimentos por tipo de prioridade
   public getTicketsByPriority(): Map<Priority, number> {
     const result = new Map<Priority, number>();
+    const allTickets = this.ticketService.getAllTickets();
+
+    allTickets.forEach(ticket => {
+      const priority = ticket.getPriority();
+      const count = result.get(priority) || 0;
+      result.set(priority, count + 1);
+    });
 
     Object.values(Priority).forEach(priority => {
-      const tickets = this.ticketService.getTicketsByPriority(priority);
-      result.set(priority, tickets.length);
+      if (!result.has(priority)) {
+        result.set(priority, 0);
+      }
     });
 
     return result;
   }
 
-  // Quantidade de tickets processados por operador técnico
-  public getTicketsByReceptionist(): Map<number, number> {
-    const result = new Map<number, number>();
+  // 3. Quantidade de tickets processados por operador técnico - CORRIGIDO
+  public getTicketsByReceptionist(): Map<number, { name: string, count: number }> {
+    const result = new Map<number, { name: string, count: number }>();
     const receptionists = this.receptionistService.getAllReceptionists();
+    const allTickets = this.ticketService.getAllTickets();
 
+    // Inicializar todos os recepcionistas com contagem 0
     receptionists.forEach(receptionist => {
-      const stats = this.receptionistService.getReceptionistStats(receptionist.getId());
-      result.set(receptionist.getId(), stats.totalProcessed);
+      const receptionistId = receptionist.getId();
+      const receptionistName = receptionist.getName();
+      result.set(receptionistId, { name: receptionistName, count: 0 });
+    });
+
+    // Contar tickets por recepcionista - APENAS tickets que foram processados
+    allTickets.forEach(ticket => {
+      const receptionistId = ticket.getReceptionistId();
+
+      // Verificar se o ticket foi realmente processado (tem especialista designado ou está completo)
+      const wasProcessed = ticket.getSpecialistId() !== undefined || ticket.isCompleted();
+
+      if (receptionistId && result.has(receptionistId) && wasProcessed) {
+        const current = result.get(receptionistId)!;
+        result.set(receptionistId, { ...current, count: current.count + 1 });
+      }
     });
 
     return result;
   }
 
-  // Quantidade de atendimentos finalizados por especialista
-  public getCompletedTicketsBySpecialist(): Map<number, number> {
-    const result = new Map<number, number>();
+  // 4. Quantidade de atendimentos finalizados por especialista
+  public getCompletedTicketsBySpecialist(): Map<number, { name: string, count: number }> {
+    const result = new Map<number, { name: string, count: number }>();
     const specialists = this.specialistService.getAllSpecialists();
+    const allTickets = this.ticketService.getAllTickets();
 
     specialists.forEach(specialist => {
-      const stats = this.specialistService.getSpecialistStats(specialist.getId());
-      result.set(specialist.getId(), stats.completed);
+      const specialistId = specialist.getId();
+      const specialistName = specialist.getName();
+      result.set(specialistId, { name: specialistName, count: 0 });
+    });
+
+    allTickets.forEach(ticket => {
+      const ticketStatus = ticket.isCompleted();
+      const specialistId = ticket.getSpecialistId();
+
+      if (ticketStatus && specialistId && result.has(specialistId)) {
+        const current = result.get(specialistId)!;
+        result.set(specialistId, { ...current, count: current.count + 1 });
+      }
     });
 
     return result;
   }
 
-  // Nave com maior número de chamados
-  public getSpaceshipWithMostTickets(): { spaceshipId: number, count: number, name?: string } | null {
+  // 5. Nave com maior número de chamados
+  public getSpaceshipWithMostTickets(): { name: string, count: number } | null {
     const allTickets = this.ticketService.getAllTickets();
     const spaceshipCount = new Map<number, number>();
 
     allTickets.forEach(ticket => {
-      const count = spaceshipCount.get(ticket.getSpaceshipId()) || 0;
-      spaceshipCount.set(ticket.getSpaceshipId(), count + 1);
+      const spaceshipId = ticket.getSpaceshipId();
+      if (spaceshipId) {
+        const count = spaceshipCount.get(spaceshipId) || 0;
+        spaceshipCount.set(spaceshipId, count + 1);
+      }
     });
+
+    if (spaceshipCount.size === 0) return null;
 
     let maxSpaceshipId: number | null = null;
     let maxCount = 0;
@@ -78,53 +133,63 @@ export class StatisticsService {
 
     if (maxSpaceshipId) {
       const spaceship = this.spaceshipService.getSpaceshipById(maxSpaceshipId);
-      return {
-        spaceshipId: maxSpaceshipId,
-        count: maxCount,
-        name: spaceship?.getName()
-      };
+      const spaceshipName = spaceship ? spaceship.getName() : `Nave ${maxSpaceshipId}`;
+      return { name: spaceshipName, count: maxCount };
     }
 
     return null;
   }
 
-  // Estatísticas de naves cadastradas
-  public getSpaceshipStats(): {
-    total: number;
-    bySector: Map<string, number>;
-    mostActive: { spaceshipId: number, count: number, name?: string } | null;
-  } {
-    const spaceships = this.spaceshipService.getAllSpaceships();
-    const bySector = new Map<string, number>();
+  // ========== ESTATÍSTICAS AVANÇADAS ==========
 
-    spaceships.forEach(spaceship => {
-      const sector = spaceship.getOrbitalSector();
-      const count = bySector.get(sector) || 0;
-      bySector.set(sector, count + 1);
+  // Top 5 naves com mais tickets
+  public getTopSpaceships(limit: number = 5): { name: string, count: number }[] {
+    const allTickets = this.ticketService.getAllTickets();
+    const spaceshipCount = new Map<number, number>();
+
+    allTickets.forEach(ticket => {
+      const spaceshipId = ticket.getSpaceshipId();
+      if (spaceshipId) {
+        const count = spaceshipCount.get(spaceshipId) || 0;
+        spaceshipCount.set(spaceshipId, count + 1);
+      }
     });
 
-    return {
-      total: spaceships.length,
-      bySector: bySector,
-      mostActive: this.getSpaceshipWithMostTickets()
-    };
+    return Array.from(spaceshipCount.entries())
+      .map(([spaceshipId, count]) => {
+        const spaceship = this.spaceshipService.getSpaceshipById(spaceshipId);
+        const name = spaceship ? spaceship.getName() : `Nave ${spaceshipId}`;
+        return { name, count };
+      })
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
   }
 
-  // Estatísticas de especialistas por especialidade
-  public getSpecialistsBySpecialty(): Map<string, number> {
-    const result = new Map<string, number>();
-    const specialists = this.specialistService.getAllSpecialists();
+  // Top 3 recepcionistas com mais tickets processados - NOVO MÉTODO ESPECÍFICO
+  public getTopReceptionists(limit: number = 3): { name: string, count: number }[] {
+    const receptionistStats = this.getTicketsByReceptionist();
 
-    specialists.forEach(specialist => {
-      const specialty = specialist.getSpecialty();
-      const count = result.get(specialty) || 0;
-      result.set(specialty, count + 1);
+    return Array.from(receptionistStats.entries())
+      .map(([id, data]) => data)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+  }
+
+  // Estatísticas por status
+  public getTicketsByStatus(): Map<string, number> {
+    const result = new Map<string, number>();
+    const allTickets = this.ticketService.getAllTickets();
+
+    allTickets.forEach(ticket => {
+      const status = ticket.isCompleted() ? 'COMPLETED' : 'PENDING';
+      const count = result.get(status) || 0;
+      result.set(status, count + 1);
     });
 
     return result;
   }
 
-  // Tempo médio de atendimento (em minutos)
+  // Tempo médio de atendimento
   public getAverageProcessingTime(): number {
     const allTickets = this.ticketService.getAllTickets();
     const completedTickets = allTickets.filter(ticket => ticket.isCompleted());
@@ -139,64 +204,145 @@ export class StatisticsService {
     return Math.round(totalTime / completedTickets.length);
   }
 
-  // Taxa de conclusão por prioridade
-  public getCompletionRateByPriority(): Map<Priority, number> {
-    const result = new Map<Priority, number>();
+  // Taxa de conclusão
+  public getCompletionRate(): number {
+    const allTickets = this.ticketService.getAllTickets();
+    const completedTickets = allTickets.filter(ticket => ticket.isCompleted());
+
+    return allTickets.length > 0
+      ? (completedTickets.length / allTickets.length) * 100
+      : 0;
+  }
+
+  // Estatísticas de especialistas por especialidade
+  public getSpecialistsPerformance(): Map<string, { total: number, completed: number, rate: number }> {
+    const result = new Map<string, { total: number, completed: number, rate: number }>();
+    const specialists = this.specialistService.getAllSpecialists();
     const allTickets = this.ticketService.getAllTickets();
 
-    Object.values(Priority).forEach(priority => {
-      const priorityTickets = allTickets.filter(ticket => ticket.getPriority() === priority);
-      const completedTickets = priorityTickets.filter(ticket => ticket.isCompleted());
+    specialists.forEach(specialist => {
+      const specialty = specialist.getSpecialty();
+      const specialistId = specialist.getId();
 
-      const completionRate = priorityTickets.length > 0
-        ? (completedTickets.length / priorityTickets.length) * 100
-        : 0;
+      const specialistTickets = allTickets.filter(ticket =>
+        ticket.getSpecialistId() === specialistId
+      );
 
-      result.set(priority, Math.round(completionRate));
+      const completedTickets = specialistTickets.filter(ticket =>
+        ticket.isCompleted()
+      );
+
+      const current = result.get(specialty) || { total: 0, completed: 0, rate: 0 };
+
+      result.set(specialty, {
+        total: current.total + specialistTickets.length,
+        completed: current.completed + completedTickets.length,
+        rate: specialistTickets.length > 0 ?
+          ((completedTickets.length / specialistTickets.length) * 100) : 0
+      });
     });
 
     return result;
   }
 
-  // Estatísticas gerais do dia
-  public getDailyStats() {
+  // ========== DASHBOARD COMPLETO ==========
+
+  public getDashboardData() {
     const allTickets = this.ticketService.getAllTickets();
     const today = new Date();
+    const todayString = today.toISOString().split('T')[0];
+
     const todayTickets = allTickets.filter(ticket => {
-      const ticketDate = ticket.getCreatedAt();
-      return ticketDate.toDateString() === today.toDateString();
+      const ticketDate = ticket.getCreatedAt().toISOString().split('T')[0];
+      return ticketDate === todayString;
     });
 
+    const completionRate = this.getCompletionRate();
+
     return {
-      totalToday: todayTickets.length,
-      completedToday: todayTickets.filter(t => t.isCompleted()).length,
-      queueStats: this.ticketService.getQueueStats(),
-      priorityBreakdown: this.getTicketsByPriority(),
-      spaceshipStats: this.getSpaceshipStats(),
-      averageProcessingTime: this.getAverageProcessingTime()
+      // Dados gerais
+      general: {
+        totalTickets: allTickets.length,
+        totalSpaceships: this.spaceshipService.getAllSpaceships().length,
+        totalReceptionists: this.receptionistService.getAllReceptionists().length,
+        totalSpecialists: this.specialistService.getAllSpecialists().length,
+        completionRate: Math.round(completionRate)
+      },
+
+      // Tickets
+      tickets: {
+        byPriority: this.getTicketsByPriority(),
+        byStatus: this.getTicketsByStatus(),
+        daily: this.getDailyRequests(),
+        today: {
+          total: todayTickets.length,
+          completed: todayTickets.filter(t => t.isCompleted()).length,
+          emergency: todayTickets.filter(t => t.getPriority() === Priority.EMERGENCY).length
+        }
+      },
+
+      // Performance
+      performance: {
+        avgTime: this.getAverageProcessingTime(),
+        specialistPerformance: this.getSpecialistsPerformance()
+      },
+
+      // Rankings - CORRIGIDO: usando o novo método getTopReceptionists
+      rankings: {
+        topSpaceships: this.getTopSpaceships(5),
+        topReceptionists: this.getTopReceptionists(3), // CORRIGIDO
+        topSpecialists: Array.from(this.getCompletedTicketsBySpecialist().entries())
+          .map(([id, data]) => data)
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 3)
+      },
+
+      // Estatísticas em tempo real
+      realTime: {
+        queueSize: allTickets.filter(t => !t.isCompleted()).length,
+        availableSpecialists: this.specialistService.getAllSpecialists().length,
+        activeEmergencies: allTickets.filter(t =>
+          t.getPriority() === Priority.EMERGENCY && !t.isCompleted()
+        ).length
+      }
     };
   }
 
-  // Dashboard completo
-  public getDashboardData() {
-    return {
-      general: {
-        totalTickets: this.getTotalRequests(),
-        totalSpaceships: this.spaceshipService.getSpaceshipsCount(),
-        totalReceptionists: this.receptionistService.getAllReceptionists().length,
-        totalSpecialists: this.specialistService.getAllSpecialists().length
-      },
-      tickets: {
-        byPriority: this.getTicketsByPriority(),
-        completionRate: this.getCompletionRateByPriority(),
-        averageTime: this.getAverageProcessingTime()
-      },
-      spaceships: this.getSpaceshipStats(),
-      specialists: {
-        bySpecialty: this.getSpecialistsBySpecialty(),
-        performance: this.getCompletedTicketsBySpecialist()
-      },
-      daily: this.getDailyStats()
-    };
+  // Método para gerar relatório completo
+  public generateReport(): string {
+    const dashboard = this.getDashboardData();
+
+    return `
+RELATÓRIO DO CENTRO DE CONTROLE ESPACIAL
+=========================================
+
+ESTATÍSTICAS GERAIS:
+-------------------
+• Total de Tickets: ${dashboard.general.totalTickets}
+• Naves Cadastradas: ${dashboard.general.totalSpaceships}
+• Especialistas: ${dashboard.general.totalSpecialists}
+• Recepcionistas: ${dashboard.general.totalReceptionists}
+• Taxa de Conclusão: ${dashboard.general.completionRate}%
+
+ATIVIDADE DO DIA:
+----------------
+• Tickets Hoje: ${dashboard.tickets.today.total}
+• Concluídos Hoje: ${dashboard.tickets.today.completed}
+• Emergências Hoje: ${dashboard.tickets.today.emergency}
+
+FILA ATUAL:
+----------
+• Tickets na Fila: ${dashboard.realTime.queueSize}
+• Total de Especialistas: ${dashboard.realTime.availableSpecialists}
+• Emergências Ativas: ${dashboard.realTime.activeEmergencies}
+
+TOP PERFORMERS:
+--------------
+• Nave Mais Ativa: ${dashboard.rankings.topSpaceships[0]?.name || 'N/A'} (${dashboard.rankings.topSpaceships[0]?.count || 0})
+• Recepcionista Top: ${dashboard.rankings.topReceptionists[0]?.name || 'N/A'} (${dashboard.rankings.topReceptionists[0]?.count || 0})
+• Especialista Top: ${dashboard.rankings.topSpecialists[0]?.name || 'N/A'} (${dashboard.rankings.topSpecialists[0]?.count || 0})
+
+TEMPO MÉDIO: ${dashboard.performance.avgTime} minutos
+    `;
   }
 }
